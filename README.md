@@ -49,7 +49,7 @@ Ouvrir dans le navigateur : `http://localhost/talent-hub`
 
 ---
 
-## 📁 Structure du Projet
+## 📁 Structure du Project
 
 ```
 │   .env
