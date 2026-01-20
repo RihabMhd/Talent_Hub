@@ -1,8 +1,8 @@
 <?php
-// Start session
+// start session
 session_start();
 
-// Autoload dependencies
+// autoload dependencies
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Config\Database;
@@ -16,25 +16,42 @@ use App\Controllers\Admin\JobOfferController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 
-// Initialize database connection
+// initialize database connection
 $database = new Database();
 $db = $database->getConnection();
 
-// Initialize repositories
+// initialize twig
+$loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../app/views');
+$twig = new \Twig\Environment($loader, [
+    'cache' => false,
+    'debug' => true,
+]);
+
+$twig->addExtension(new \Twig\Extension\DebugExtension());
+$twig->addFunction(new \Twig\TwigFunction('url', function($path) {
+    return '/' . ltrim($path, '/');
+}));
+
+// initialize repositories
 $userRepository = new UserRepository($db);
 
-// Initialize services
+// initialize services
 $validatorService = new ValidatorService();
 $authService = new AuthService($userRepository);
 
-// Initialize controllers
+// initialize controllers
 $controllers = [
     'auth' => new AuthController($authService, $validatorService),
     // [CHANGE 2] Initialize the JobOfferController
     'jobOffer' => new JobOfferController() 
 ];
 
-// Initialize middlewares
+// load admin controllers
+$adminControllerLoader = require __DIR__ . '/../app/Config/controllers.php';
+$adminControllers = $adminControllerLoader($twig, $db);
+$controllers = array_merge($controllers, $adminControllers);
+
+// initialize middlewares
 $middlewares = [
     'auth' => new AuthMiddleware(),
     'admin' => new RoleMiddleware(['admin']),
@@ -42,10 +59,10 @@ $middlewares = [
     'candidate' => new RoleMiddleware(['candidate', 'candidat'])
 ];
 
-// Create router instance
+// create router instance
 $router = new Router();
 
-// Load route files
+// load route files
 $routeFiles = [
     __DIR__ . '/../routes/web.php',
     __DIR__ . '/../routes/admin.php',
@@ -97,7 +114,7 @@ $router->get('/dashboard', function() use ($authService) {
         exit;
     }
     
-    // Redirect based on role
+    // redirect based on role
     switch ($user['role_id']) {
         case 1:
             header('Location: /admin/dashboard'); // Ensure you have a route for this too!
@@ -115,7 +132,7 @@ $router->get('/dashboard', function() use ($authService) {
     exit;
 }, [$middlewares['auth']]);
 
-// Change password routes
+// change password routes
 $router->get('/change-password', function() use ($controllers) {
     $controllers['auth']->showChangePasswordForm();
 }, [$middlewares['auth']]);
@@ -124,7 +141,7 @@ $router->post('/change-password', function() use ($controllers) {
     $controllers['auth']->changePassword();
 }, [$middlewares['auth']]);
 
-// Dispatch the request
+// dispatch the request
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
 

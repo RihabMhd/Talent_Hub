@@ -46,9 +46,12 @@ class Router
         }
 
         foreach ($this->routes as $route) {
-            if ($route['method'] === $requestMethod && $this->matchRoute($route['path'], $uri)) {
-                $this->executeRoute($route);
-                return;
+            if ($route['method'] === $requestMethod) {
+                $params = $this->matchRoute($route['path'], $uri);
+                if ($params !== false) {
+                    $this->executeRoute($route, $params);
+                    return;
+                }
             }
         }
 
@@ -56,25 +59,44 @@ class Router
         echo '<h1>404 - Page Not Found</h1><p>URI: ' . htmlspecialchars($uri) . '</p>';
     }
 
-    private function matchRoute(string $routePath, string $uri): bool
+    private function matchRoute(string $routePath, string $uri)
     {
+        // Extract parameter names from route path
+        preg_match_all('/\{([a-zA-Z0-9_]+)\}/', $routePath, $paramNames);
+        
+        // Create pattern for matching
         $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([^/]+)', $routePath);
         $pattern = '#^' . $pattern . '$#';
         
-        return preg_match($pattern, $uri) === 1;
+        // Match the URI against the pattern
+        if (preg_match($pattern, $uri, $matches) === 1) {
+            // Remove the full match
+            array_shift($matches);
+            
+            // Create associative array of parameters
+            $params = [];
+            foreach ($paramNames[1] as $index => $name) {
+                $params[$name] = $matches[$index] ?? null;
+            }
+            
+            return $params;
+        }
+        
+        return false;
     }
 
-    private function executeRoute(array $route): void
+    private function executeRoute(array $route, array $params = []): void
     {
         $handler = $route['handler'];
         $middlewares = $route['middlewares'];
 
-        $next = function() use ($handler) {
+        $next = function() use ($handler, $params) {
             if (is_callable($handler)) {
-                return $handler();
+                // Pass parameters to the handler
+                return call_user_func_array($handler, $params);
             } elseif (is_array($handler)) {
                 [$controller, $method] = $handler;
-                return $controller->$method();
+                return call_user_func_array([$controller, $method], $params);
             }
         };
 

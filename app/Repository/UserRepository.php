@@ -38,8 +38,7 @@ class UserRepository
     
     public function create(array $userData): ?int
     {
-        // Handle both 'name' and 'nom'/'prenom' formats
-        $nom = $userData['nom'] ?? $userData['name'] ?? '';
+        $nom = $userData['nom'] ?? '';
         $prenom = $userData['prenom'] ?? '';
         
         $stmt = $this->db->prepare(
@@ -74,7 +73,7 @@ class UserRepository
     
     public function update(int $id, array $userData): bool
     {
-        $nom = $userData['nom'] ?? $userData['name'] ?? '';
+        $nom = $userData['nom'] ?? '';
         $prenom = $userData['prenom'] ?? '';
         
         $stmt = $this->db->prepare(
