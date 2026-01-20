@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recruiter Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {# Tailwind CDN + Navbar globale #}
+    {% include 'partials/header.twig' %}
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-800 flex flex-col">
+
+<main class="flex-1 max-w-7xl mx-auto px-6 py-10">
+
+    {% if session.success is defined %}
+        <div class="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            {{ session.success }}
+        </div>
+    {% endif %}
+
+    <!-- Page header -->
+    <div class="mb-10">
+        <h2 class="text-2xl font-semibold mb-1">Dashboard</h2>
+        <p class="text-slate-600">
+            Manage your recruitment activities and account settings
+        </p>
+    </div>
+
+    <!-- ================= GRID ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Account info -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+            <div class="mb-5">
+                <h3 class="text-lg font-semibold">Account Information</h3>
+                <p class="text-sm text-slate-600">
+                    Your profile and contact details
+                </p>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Full Name</span>
+                    <span class="font-medium">{{ current_user.name }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Email Address</span>
+                    <span class="font-medium">{{ current_user.email }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Account Type</span>
+                    <span class="font-medium">Recruiter</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Status</span>
+                    <span class="font-medium text-green-600">Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overview -->
+        <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+            <div class="mb-5">
+                <h3 class="text-lg font-semibold">Overview</h3>
+                <p class="text-sm text-slate-600">
+                    Quick statistics
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="border border-slate-200 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-semibold">0</div>
+                    <div class="text-sm text-slate-600">Active Jobs</div>
+                </div>
+                <div class="border border-slate-200 rounded-lg p-4 text-center">
+                    <div class="text-2xl font-semibold">0</div>
+                    <div class="text-sm text-slate-600">Applications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= ACTIONS ================= -->
+    <div class="mt-10">
+        <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <a href="{{ url('change-password') }}"
+               class="flex items-center gap-4 bg-white border border-slate-200 rounded-lg p-5
+                      hover:shadow-md transition">
+
+                <div class="w-10 h-10 flex items-center justify-center rounded-md bg-slate-800 text-white">
+                    🔐
+                </div>
+
+                <div>
+                    <div class="font-medium">Change Password</div>
+                    <div class="text-sm text-slate-600">
+                        Update your security credentials
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+
+</main>
+
+{% include 'partials/footer.twig' %}
+</body>
+</html>
