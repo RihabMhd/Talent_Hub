@@ -2,7 +2,7 @@
 namespace App\Controllers\Admin;
 
 use App\Models\JobOffer;
-use App\Config\Twig; // 1. Don't forget to import your Twig wrapper
+use App\Config\Twig; 
 
 class JobOfferController {
 
