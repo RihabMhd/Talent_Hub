@@ -17,7 +17,7 @@ return function(Router $router, $controllers, $middlewares) {
         
         // dashboard
         $router->get('/dashboard', function() {
-            Twig::render('admin/dashboard.twig');
+            Twig::render('admin/dashboard.html.twig');
         });
         
         // user Management (future implementation)
