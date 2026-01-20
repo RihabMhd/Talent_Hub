@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | TalentHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
+
+    {% include 'admin/sidebar.html.twig' %}
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
+        
+        <header class="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8">
+            <div class="relative w-96 hidden md:block">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" placeholder="Search..." class="w-full bg-slate-50 text-slate-600 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm">
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 pl-6 border-l border-slate-100">
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-bold text-slate-800">{{ current_user.name }}</div>
+                        <div class="text-xs text-slate-400">Administrator</div>
+                    </div>
+                    <div class="h-10 w-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center text-indigo-700 font-bold">
+                        {{ current_user.name|slice(0,1)|upper }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+            
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
+                    <p class="text-slate-500 mt-1">Overview of system performance and user metrics.</p>
+                </div>
+            </div>
+
+            {% if session.success is defined %}
+                <div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-6 py-4 text-sm text-green-700 flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ session.success }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-slate-800 mb-1">{{ total_users }}</div>
+                        <div class="text-sm font-medium text-slate-400">Total Users</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-slate-800 mb-1">{{ total_roles }}</div>
+                        <div class="text-sm font-medium text-slate-400">Defined Roles</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between h-40 hover:shadow-md transition-shadow">
+                     <div class="flex justify-between items-start">
+                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <span class="text-xs font-semibold text-green-500 bg-green-50 px-2 py-1 rounded-full">Active</span>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-slate-800 mb-1">98.5%</div>
+                        <div class="text-sm font-medium text-slate-400">System Uptime</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                
+                <div class="xl:col-span-1 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="h-16 w-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg shadow-indigo-200">
+                             {{ current_user.name|slice(0,1)|upper }}
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">{{ current_user.name }}</h3>
+                            <p class="text-sm text-slate-500">{{ current_user.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                            <span class="text-sm text-slate-500">Role</span>
+                            <span class="text-sm font-semibold text-slate-800">Administrator</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 border-b border-slate-50">
+                            <span class="text-sm text-slate-500">Status</span>
+                            <span class="flex items-center gap-2 text-sm font-semibold text-green-600">
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span> Active
+                            </span>
+                        </div>
+                        <div class="pt-4">
+                             <a href="{{ url('change-password') }}" class="block w-full text-center py-3 rounded-xl border border-slate-200 text-slate-600 font-medium hover:bg-slate-50 transition-colors text-sm">
+                                Security Settings
+                             </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Quick Actions</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        
+                        <a href="{{ url('admin/users') }}" class="group block p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-300 group-hover:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-800 mb-1">Manage Users</h4>
+                            <p class="text-sm text-gray-500">Add, edit, or remove user accounts.</p>
+                        </a>
+
+                        <a href="/admin/offers" class="group block p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-300 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-800 mb-1">Manage Jobs</h4>
+                            <p class="text-sm text-gray-500">Review, approve, or archive job posts.</p>
+                        </a>
+
+                        <a href="{{ url('admin/roles') }}" class="group block p-6 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </div>
+                                <svg class="w-5 h-5 text-gray-300 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-800 mb-1">Roles & Permissions</h4>
+                            <p class="text-sm text-gray-500">Configure access levels.</p>
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</body>
+</html>
