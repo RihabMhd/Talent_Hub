@@ -22,7 +22,6 @@ class AuthService
         
         $roleNames = [1 => 'admin', 2 => 'recruteur', 3 => 'candidat'];
         
-        // Combine nom and prenom for display name
         $fullName = trim($user['nom'] . ' ' . $user['prenom']);
         
         $_SESSION['user'] = [

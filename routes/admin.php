@@ -16,58 +16,143 @@ return function(Router $router, $controllers, $middlewares) {
     ], function($router) use ($controllers) {
         
         // dashboard
-        $router->get('/dashboard', function() {
-            Twig::render('admin/dashboard.html.twig');
+        $router->get('/dashboard', function() use ($controllers) {
+            $controllers['dashboard']->index();
         });
         
-        // user Management (future implementation)
-        $router->get('/users', function() {
-            echo "Admin - User List";
+        // User Management
+        $router->get('/users', function() use ($controllers) {
+            $controllers['user']->index();
         });
         
-        $router->get('/users/create', function() {
-            echo "Admin - Create User";
+        $router->get('/users/create', function() use ($controllers) {
+            $controllers['user']->create();
         });
         
-        $router->post('/users', function() {
-            echo "Admin - Store User";
+        $router->post('/users', function() use ($controllers) {
+            $controllers['user']->store();
         });
         
-        $router->get('/users/{id}/edit', function() {
-            echo "Admin - Edit User";
+        $router->get('/users/{id}/edit', function($id) use ($controllers) {
+            $controllers['user']->edit($id);
         });
         
-        $router->post('/users/{id}', function() {
-            echo "Admin - Update User";
+        $router->post('/users/{id}', function($id) use ($controllers) {
+            $controllers['user']->update($id);
         });
         
-        $router->post('/users/{id}/delete', function() {
-            echo "Admin - Delete User";
+        $router->post('/users/{id}/delete', function($id) use ($controllers) {
+            $controllers['user']->destroy($id);
         });
         
-        // categories
-        $router->get('/categories', function() {
-            echo "Admin - Category List";
+        // Category Management
+        $router->get('/categories', function() use ($controllers) {
+            $controllers['category']->index();
         });
         
-        // tags
-        $router->get('/tags', function() {
-            echo "Admin - Tag List";
+        $router->post('/categories/store', function() use ($controllers) {
+            $controllers['category']->store();
         });
         
-        // job Offers
-        $router->get('/jobs', function() {
-            echo "Admin - Job List";
+        $router->post('/categories/update/{id}', function($id) use ($controllers) {
+            $controllers['category']->update($id);
         });
         
-        // applications
-        $router->get('/applications', function() {
-            echo "Admin - Application List";
+        $router->post('/categories/delete/{id}', function($id) use ($controllers) {
+            $controllers['category']->destroy($id);
         });
         
-        // statistics
-        $router->get('/statistics', function() {
-            echo "Admin - Statistics";
+        // Tag Management
+        $router->get('/tags', function() use ($controllers) {
+            $controllers['tag']->index();
+        });
+        
+        $router->post('/tags/store', function() use ($controllers) {
+            $controllers['tag']->store();
+        });
+        
+        $router->post('/tags/update/{id}', function($id) use ($controllers) {
+            $controllers['tag']->update($id);
+        });
+        
+        $router->post('/tags/delete/{id}', function($id) use ($controllers) {
+            $controllers['tag']->destroy($id);
+        });
+        
+        // Job Offers Management
+        $router->get('/jobs', function() use ($controllers) {
+            $controllers['job']->index();
+        });
+        
+        $router->get('/jobs/create', function() use ($controllers) {
+            $controllers['job']->create();
+        });
+        
+        $router->post('/jobs', function() use ($controllers) {
+            $controllers['job']->store();
+        });
+        
+        $router->get('/jobs/{id}/edit', function($id) use ($controllers) {
+            $controllers['job']->edit($id);
+        });
+        
+        $router->post('/jobs/{id}', function($id) use ($controllers) {
+            $controllers['job']->update($id);
+        });
+        
+        $router->post('/jobs/{id}/archive', function($id) use ($controllers) {
+            $controllers['job']->archive($id);
+        });
+        
+        $router->post('/jobs/{id}/restore', function($id) use ($controllers) {
+            $controllers['job']->restore($id);
+        });
+        
+        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
+            $controllers['job']->destroy($id);
+        });
+        
+        // Applications Management
+        $router->get('/applications', function() use ($controllers) {
+            $controllers['application']->index();
+        });
+        
+        $router->get('/applications/{id}', function($id) use ($controllers) {
+            $controllers['application']->show($id);
+        });
+        
+        $router->post('/applications/{id}/approve', function($id) use ($controllers) {
+            $controllers['application']->approve($id);
+        });
+        
+        $router->post('/applications/{id}/reject', function($id) use ($controllers) {
+            $controllers['application']->reject($id);
+        });
+        
+        $router->post('/applications/{id}/delete', function($id) use ($controllers) {
+            $controllers['application']->destroy($id);
+        });
+        
+        // Statistics
+        $router->get('/statistics', function() use ($controllers) {
+            $controllers['statistics']->index();
+        });
+        
+        // Roles Management
+        $router->get('/roles', function() use ($controllers) {
+            $controllers['role']->index();
+        });
+        
+        $router->post('/roles/store', function() use ($controllers) {
+            $controllers['role']->store();
+        });
+        
+        $router->post('/roles/update/{id}', function($id) use ($controllers) {
+            $controllers['role']->update($id);
+        });
+        
+        $router->post('/roles/delete/{id}', function($id) use ($controllers) {
+            $controllers['role']->destroy($id);
         });
     });
 };
