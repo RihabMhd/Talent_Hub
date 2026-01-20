@@ -1,0 +1,66 @@
+ <script src="https://cdn.tailwindcss.com"></script>
+
+<header class="bg-white border-b border-slate-200">
+	<div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+
+		<div class="text-lg font-semibold text-slate-800">
+			Talent Hub
+		</div>
+		<a href="{{ url('logout') }}" class="text-slate-600 hover:text-slate-800 font-medium">
+			Logout
+		</a>
+
+		{% if app.user is defined %}
+			<nav
+				class="flex items-center space-x-6 text-sm">
+
+				{# ================= ADMIN ================= #}
+				{% if app.user.role_id == 1 %}
+					<a href="/admin/dashboard" class="text-slate-600 hover:text-slate-800">
+						Admin Dashboard
+					</a>
+					<a href="/admin/users" class="text-slate-600 hover:text-slate-800">
+						Users
+					</a>
+					<a href="/admin/settings" class="text-slate-600 hover:text-slate-800">
+						Settings
+					</a>
+
+					{# =============== RECRUITER =============== #}
+				{% elseif app.user.role_id == 2 %}
+					<a href="/recruiter/dashboard" class="text-slate-600 hover:text-slate-800">
+						Dashboard
+					</a>
+					<a href="/recruiter/jobs" class="text-slate-600 hover:text-slate-800">
+						Job Offers
+					</a>
+					<a href="/recruiter/applications" class="text-slate-600 hover:text-slate-800">
+						Applications
+					</a>
+
+					{# =============== CANDIDATE =============== #}
+				{% elseif app.user.role_id == 3 %}
+					<a href="/candidate/dashboard" class="text-slate-600 hover:text-slate-800">
+						Dashboard
+					</a>
+					<a href="/candidate/profile" class="text-slate-600 hover:text-slate-800">
+						My Profile
+					</a>
+					<a href="/candidate/applications" class="text-slate-600 hover:text-slate-800">
+						My Applications
+					</a>
+				{% endif %}
+
+				<a href="/change-password" class="text-slate-600 hover:text-slate-800">
+					Change Password
+				</a>
+
+				<a href="/logout" class="text-slate-600 hover:text-slate-800 font-medium">
+					Logout
+				</a>
+
+			</nav>
+		{% endif %}
+
+	</div>
+</header>
