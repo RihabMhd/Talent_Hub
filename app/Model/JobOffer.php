@@ -1,6 +1,7 @@
 <?php
-namespace App\Models;
 
+
+namespace App\Models;
 use PDO;
 use App\Config\Database; 
 
@@ -17,9 +18,7 @@ class JobOffer {
         $this->db = $database->getConnection();
     }
 
-    /**
-     * Finds offers for Admin with Company and User details
-     */
+    
     public function findAllForAdmin($filter = 'all') {
         $sql = "SELECT o.*, 
                        comp.nom_entreprise, 
