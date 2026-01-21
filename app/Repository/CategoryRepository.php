@@ -14,7 +14,7 @@ class CategoryRepository
 
     public function findAll(): array
     {
-        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id DESC");
+        $stmt = $this->db->query("SELECT * FROM categories ORDER BY id ASC");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

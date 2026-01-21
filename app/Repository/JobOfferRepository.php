@@ -24,7 +24,7 @@ class JobOfferRepository
                 JOIN users u ON comp.user_id = u.id
                 JOIN categories cat ON o.category_id = cat.id
                 WHERE o.deleted_at IS NULL
-                ORDER BY o.created_at DESC";
+                ORDER BY o.created_at ASC";
         
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
