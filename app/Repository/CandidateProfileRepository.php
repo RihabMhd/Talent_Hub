@@ -7,11 +7,12 @@ use App\Config\Database ;
 
 class CandidateProfileRepository {
 
-  private $db ;
+  private $conn;
 
-  public function __construct(){
-    $this->db = new database();
-  }
+    public function __construct(){
+        $database = new Database();
+        $this->conn = $database->getConnection();
+    }
 
   public function findByUserId($user_id)
 {
