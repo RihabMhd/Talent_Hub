@@ -2,10 +2,10 @@
 
 use App\Config\Router;
 
-return function(Router $router, $controllers, $middlewares) {
+return function (Router $router, $controllers, $middlewares) {
     $authMiddleware = $middlewares['auth'];
     $adminMiddleware = $middlewares['admin'];
-    
+
     // admin routes group
     $router->group([
         'prefix' => '/admin',
@@ -30,32 +30,33 @@ return function(Router $router, $controllers, $middlewares) {
             $controllers['user']->store();
         });
         
-        $router->get('/users/{id}/edit', function($id) use ($controllers) {
-            $controllers['user']->edit($id);
+        // Alternative route for pending (keeps old links working)
+        $router->get('/users/pending', function () use ($controllers) {
+            $controllers['adminUser']->pending();
         });
-        
-        $router->post('/users/{id}', function($id) use ($controllers) {
-            $controllers['user']->update($id);
+
+        $router->post('/users/verify/{id}', function ($id) use ($controllers) {
+            $controllers['adminUser']->verify($id);
         });
-        
-        $router->post('/users/{id}/delete', function($id) use ($controllers) {
-            $controllers['user']->destroy($id);
+
+        $router->post('/users/reject/{id}', function ($id) use ($controllers) {
+            $controllers['adminUser']->reject($id);
         });
         
         // --- Category Management ---
         $router->get('/categories', function() use ($controllers) {
             $controllers['category']->index();
         });
-        
-        $router->post('/categories/store', function() use ($controllers) {
+
+        $router->post('/categories/store', function () use ($controllers) {
             $controllers['category']->store();
         });
-        
-        $router->post('/categories/update/{id}', function($id) use ($controllers) {
+
+        $router->post('/categories/update/{id}', function ($id) use ($controllers) {
             $controllers['category']->update($id);
         });
-        
-        $router->post('/categories/delete/{id}', function($id) use ($controllers) {
+
+        $router->post('/categories/delete/{id}', function ($id) use ($controllers) {
             $controllers['category']->destroy($id);
         });
         
@@ -63,16 +64,16 @@ return function(Router $router, $controllers, $middlewares) {
         $router->get('/tags', function() use ($controllers) {
             $controllers['tag']->index();
         });
-        
-        $router->post('/tags/store', function() use ($controllers) {
+
+        $router->post('/tags/store', function () use ($controllers) {
             $controllers['tag']->store();
         });
-        
-        $router->post('/tags/update/{id}', function($id) use ($controllers) {
+
+        $router->post('/tags/update/{id}', function ($id) use ($controllers) {
             $controllers['tag']->update($id);
         });
-        
-        $router->post('/tags/delete/{id}', function($id) use ($controllers) {
+
+        $router->post('/tags/delete/{id}', function ($id) use ($controllers) {
             $controllers['tag']->destroy($id);
         });
         
@@ -119,16 +120,16 @@ return function(Router $router, $controllers, $middlewares) {
         $router->get('/roles', function() use ($controllers) {
             $controllers['role']->index();
         });
-        
-        $router->post('/roles/store', function() use ($controllers) {
+
+        $router->post('/roles/store', function () use ($controllers) {
             $controllers['role']->store();
         });
-        
-        $router->post('/roles/update/{id}', function($id) use ($controllers) {
+
+        $router->post('/roles/update/{id}', function ($id) use ($controllers) {
             $controllers['role']->update($id);
         });
-        
-        $router->post('/roles/delete/{id}', function($id) use ($controllers) {
+
+        $router->post('/roles/delete/{id}', function ($id) use ($controllers) {
             $controllers['role']->destroy($id);
         });
     });

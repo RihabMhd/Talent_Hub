@@ -4,6 +4,7 @@ use App\Controllers\Admin\ApplicationController;
 use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\JobOfferController;
+use App\Controllers\Admin\UserController;
 use App\Controllers\Admin\TagController;
 use App\Controllers\Candidate\ApplicationController as CandidateApplicationController;
 use App\Controllers\Candidate\JobController as CandidateJobController;
@@ -12,7 +13,8 @@ use App\Controllers\Recruiter\ApplicationController as RecruiterApplicationContr
 use App\Controllers\Recruiter\DashboardController as RecruiterDashboardController;
 use App\Controllers\Recruiter\JobOfferController as RecruiterJobOfferController;
 use App\Controllers\AuthController;
-
+use App\Controllers\Admin\AdminUserController;
+use App\Services\UserVerificationService;
 use App\Repository\ApplicationRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\JobOfferRepository;
@@ -31,12 +33,14 @@ return function($twig, $db) {
     $tagRepository = new TagRepository($db);
     $userRepository = new UserRepository($db);
     $jobOfferRepository = new JobOfferRepository($db);
+    $verificationService = new UserVerificationService($userRepository);
+    $userRepository = new UserRepository($db);
     // $applicationRepository = new ApplicationRepository($db);
 
     // Initialize Services
     $categoryService = new CategoryService($categoryRepository);
     $tagService = new TagService($tagRepository);
-    // $userService = new UserService($userRepository);
+    $userService = new UserService($userRepository);
     $jobOfferService = new JobOfferService($jobOfferRepository);
     // $applicationService = new ApplicationService($applicationRepository);
 
@@ -45,7 +49,8 @@ return function($twig, $db) {
         'dashboard' => new DashboardController($twig, $db),
         'category' => new CategoryController($categoryService, $twig),
         'tag' => new TagController($tagService, $twig),
-        // 'user' => new UserController($userService, $twig),
+        'adminUser' => new AdminUserController($verificationService, $twig),
+        'user' => new UserController($userService, $twig),
         'job' => new \App\Controllers\Admin\JobOfferController(),
         // 'application' => new ApplicationController($applicationService, $twig),
         // 'role' => new RoleController($twig, $db),

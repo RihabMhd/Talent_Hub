@@ -72,7 +72,7 @@ class TagController
     {
         if (empty($_POST['nom'])) {
             $_SESSION['error'] = 'Tag name is required';
-            header('Location: /admin/tags.html.twig');
+            header('Location: /admin/tags');
             exit;
         }
 
