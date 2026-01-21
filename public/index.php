@@ -11,8 +11,9 @@ use App\Repository\UserRepository;
 use App\Services\AuthService;
 use App\Services\ValidatorService;
 use App\Controllers\AuthController;
-// [CHANGE 1] Import the JobOfferController
 use App\Controllers\Admin\JobOfferController;
+// [NEW 1] Import the StatisticsController
+use App\Controllers\Admin\StatisticsController; 
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 
@@ -42,8 +43,9 @@ $authService = new AuthService($userRepository);
 // initialize controllers
 $controllers = [
     'auth' => new AuthController($authService, $validatorService),
-    // [CHANGE 2] Initialize the JobOfferController
-    'jobOffer' => new JobOfferController() 
+    'jobOffer' => new JobOfferController(),
+    // [NEW 2] Initialize the StatisticsController
+    'statistics' => new StatisticsController() 
 ];
 
 // load admin controllers
@@ -80,22 +82,27 @@ foreach ($routeFiles as $file) {
     }
 }
 
-// [CHANGE 3] Add Admin Job Offer Routes directly here 
-// (Or better yet, move these into routes/admin.php if you want to be cleaner)
-
-// 1. List Offers
+// --- Admin Job Offer Routes ---
 $router->get('/admin/offers', function() use ($controllers) {
     $controllers['jobOffer']->index();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-// 2. Archive Offer (assuming your Router supports regex like this)
 $router->get('/admin/offers/archive/(\d+)', function($id) use ($controllers) {
     $controllers['jobOffer']->archive($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-// 3. Restore Offer
 $router->get('/admin/offers/restore/(\d+)', function($id) use ($controllers) {
     $controllers['jobOffer']->restore($id);
+}, [$middlewares['auth'], $middlewares['admin']]);
+
+
+// [NEW 3] Admin Statistics Routes
+$router->get('/admin/statistics', function() use ($controllers) {
+    $controllers['statistics']->index();
+}, [$middlewares['auth'], $middlewares['admin']]);
+
+$router->get('/admin/statistics/export', function() use ($controllers) {
+    $controllers['statistics']->export();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 
@@ -117,7 +124,7 @@ $router->get('/dashboard', function() use ($authService) {
     // redirect based on role
     switch ($user['role_id']) {
         case 1:
-            header('Location: /admin/dashboard'); // Ensure you have a route for this too!
+            header('Location: /admin/dashboard'); 
             break;
         case 2:
             header('Location: /recruiter/dashboard');
