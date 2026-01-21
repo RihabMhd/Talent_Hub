@@ -28,14 +28,14 @@ use App\Services\UserService;
 return function($twig, $db) {
     // Initialize Repositories
     $categoryRepository = new CategoryRepository($db);
-    // $tagRepository = new TagRepository($db);
+    $tagRepository = new TagRepository($db);
     $userRepository = new UserRepository($db);
     $jobOfferRepository = new JobOfferRepository($db);
     // $applicationRepository = new ApplicationRepository($db);
 
     // Initialize Services
     $categoryService = new CategoryService($categoryRepository);
-    // $tagService = new TagService($tagRepository);
+    $tagService = new TagService($tagRepository);
     // $userService = new UserService($userRepository);
     $jobOfferService = new JobOfferService($jobOfferRepository);
     // $applicationService = new ApplicationService($applicationRepository);
@@ -44,7 +44,7 @@ return function($twig, $db) {
         // Admin Controllers
         'dashboard' => new DashboardController($twig, $db),
         'category' => new CategoryController($categoryService, $twig),
-        // 'tag' => new TagController($tagService, $twig),
+        'tag' => new TagController($tagService, $twig),
         // 'user' => new UserController($userService, $twig),
         'job' => new \App\Controllers\Admin\JobOfferController(),
         // 'application' => new ApplicationController($applicationService, $twig),

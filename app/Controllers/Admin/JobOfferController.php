@@ -1,18 +1,22 @@
 <?php
+
 namespace App\Controllers\Admin;
 
 use App\Models\JobOffer;
-use App\Config\Twig; 
+use App\Config\Twig;
 
-class JobOfferController {
+class JobOfferController
+{
 
     private $jobOfferModel;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->jobOfferModel = new JobOffer();
     }
 
-    public function index() {
+    public function index()
+    {
         // 1. Security Check
         $this->checkAdmin();
 
@@ -21,7 +25,7 @@ class JobOfferController {
         $offers = $this->jobOfferModel->findAllForAdmin($filter);
         $stats  = $this->jobOfferModel->countOffersPerRecruiter();
 
-        // 3. Render View using Twig (Fixed path)
+        // 3. Render View using Twig 
         echo Twig::render('admin/jobs/index.html.twig', [
             'offers' => $offers,
             'stats' => $stats,
@@ -34,11 +38,14 @@ class JobOfferController {
                 ]
             ]
         ]);
+        unset($_SESSION['success']);
+        unset($_SESSION['error']);
     }
 
     // --- Actions ---
 
-    public function archive($id) {
+    public function archive($id)
+    {
         $this->checkAdmin();
         if ($id) {
             $this->jobOfferModel->softDelete($id);
@@ -48,7 +55,8 @@ class JobOfferController {
         exit();
     }
 
-    public function restore($id) {
+    public function restore($id)
+    {
         $this->checkAdmin();
         if ($id) {
             $this->jobOfferModel->restore($id);
@@ -58,7 +66,8 @@ class JobOfferController {
         exit();
     }
 
-    public function create() {
+    public function create()
+    {
         $this->checkAdmin();
         // Render create form
         echo Twig::render('admin/jobs/create.html.twig', [
@@ -72,7 +81,8 @@ class JobOfferController {
         ]);
     }
 
-    public function store() {
+    public function store()
+    {
         $this->checkAdmin();
         // Handle job creation
         // Add your logic here
@@ -81,11 +91,12 @@ class JobOfferController {
         exit();
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $this->checkAdmin();
         // Get job offer and render edit form
         $offer = $this->jobOfferModel->findById($id);
-        
+
         if (!$offer) {
             $_SESSION['error'] = 'Job offer not found';
             header('Location: /admin/jobs');
@@ -104,7 +115,8 @@ class JobOfferController {
         ]);
     }
 
-    public function update($id) {
+    public function update($id)
+    {
         $this->checkAdmin();
         // Handle job update
         // Add your logic here
@@ -113,7 +125,8 @@ class JobOfferController {
         exit();
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         $this->checkAdmin();
         if ($id) {
             $this->jobOfferModel->delete($id);
@@ -125,11 +138,12 @@ class JobOfferController {
 
     // --- Security Helper ---
 
-    private function checkAdmin() {
+    private function checkAdmin()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-        
+
         // Ensure user is logged in AND is an Admin (Role ID 1)
         if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] !== 1) {
             header('Location: /login');

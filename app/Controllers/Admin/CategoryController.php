@@ -1,8 +1,9 @@
 <?php
+
 namespace App\Controllers\Admin;
 
 use App\Services\CategoryService;
-use App\Models\Category;  
+use App\Models\Category;
 
 class CategoryController
 {
@@ -18,11 +19,11 @@ class CategoryController
     public function index()
     {
         $categories = $this->categoryService->getAllCategories();
-        
-        $categoriesArray = array_map(function($category) {
+
+        $categoriesArray = array_map(function ($category) {
             return $category->toArray();
         }, $categories);
-        
+
         echo $this->twig->render('admin/category.html.twig', [
             'categories' => $categoriesArray,
             'current_user' => $_SESSION['user'] ?? null,
@@ -33,6 +34,8 @@ class CategoryController
                 ]
             ]
         ]);
+        unset($_SESSION['success']);
+        unset($_SESSION['error']);
     }
 
     public function show(int $id)
@@ -54,13 +57,13 @@ class CategoryController
         }
 
         $categoryId = $this->categoryService->createCategory($_POST['nom']);
-        
+
         if ($categoryId) {
             $_SESSION['success'] = 'Category created successfully';
         } else {
             $_SESSION['error'] = 'Failed to create category';
         }
-        
+
         header('Location: /admin/categories');
         exit;
     }
@@ -74,13 +77,13 @@ class CategoryController
         }
 
         $result = $this->categoryService->updateCategory($id, $_POST['nom']);
-        
+
         if ($result) {
             $_SESSION['success'] = 'Category updated successfully';
         } else {
             $_SESSION['error'] = 'Category not found';
         }
-        
+
         header('Location: /admin/categories');
         exit;
     }
@@ -88,13 +91,13 @@ class CategoryController
     public function destroy(int $id)
     {
         $result = $this->categoryService->deleteCategory($id);
-        
+
         if ($result) {
             $_SESSION['success'] = 'Category deleted successfully';
         } else {
             $_SESSION['error'] = 'Category not found';
         }
-        
+
         header('Location: /admin/categories');
         exit;
     }
