@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Manage Jobs | TalentHub</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+		<style>
+			body {
+				font-family: 'Inter', sans-serif;
+			}
+			::-webkit-scrollbar {
+				width: 6px;
+			}
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			::-webkit-scrollbar-thumb {
+				background: #cbd5e1;
+				border-radius: 3px;
+			}
+			::-webkit-scrollbar-thumb:hover {
+				background: #94a3b8;
+			}
+			/* Modal Animation */
+			.modal {
+				display: none;
+				opacity: 0;
+				transition: opacity 0.3s ease;
+			}
+			.modal.active {
+				display: flex;
+				opacity: 1;
+			}
+			.modal-content {
+				transform: scale(0.9);
+				transition: transform 0.3s ease;
+			}
+			.modal.active .modal-content {
+				transform: scale(1);
+			}
+		</style>
+	</head>
+
+	<body class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
+
+		{% include 'recruiter/sidebar.html.twig' %}
+
+		<main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50">
+
+			<header class="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8">
+				<div class="flex items-center gap-4">
+					<button class="md:hidden text-slate-500 hover:bg-slate-100 p-2 rounded-lg">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+						</svg>
+					</button>
+					<h1 class="text-xl font-bold text-slate-800">Job Offers</h1>
+				</div>
+
+				<div class="flex items-center gap-6">
+					<button onclick="openCreateModal()" class="hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors shadow-sm shadow-indigo-200">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+						</svg>
+						Create New Job
+					</button>
+
+					<div class="flex items-center gap-3 pl-6 border-l border-slate-100">
+						<div class="text-right hidden md:block">
+							<div class="text-sm font-bold text-slate-800">{{ current_user.prenom ~ ' ' ~ current_user.nom }}</div>
+							<div class="text-xs text-slate-400">Recruiter</div>
+						</div>
+						<div class="h-10 w-10 rounded-full bg-indigo-100 border-2 border-white shadow-sm flex items-center justify-center text-indigo-700 font-bold">
+							{{ current_user.prenom|slice(0,1)|upper }}
+						</div>
+					</div>
+				</div>
+			</header>
+
+			<div class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+
+				{% if session.success is defined %}
+					<div class="mb-6 rounded-xl border border-green-200 bg-green-50 px-6 py-4 text-sm text-green-700 flex items-center gap-3">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						{{ session.success }}
+					</div>
+				{% endif %}
+
+				{% if session.error is defined %}
+					<div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700 flex items-center gap-3">
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+						{{ session.error }}
+					</div>
+				{% endif %}
+				<div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+
+					<div class="flex border-b border-slate-100 p-4 gap-2 overflow-x-auto">
+						<a href="/recruiter/jobs?filter=all" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap {{ currentFilter == 'all' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:text-slate-700' }}">
+							All Offers
+						</a>
+						<a href="/recruiter/jobs?filter=active" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap {{ currentFilter == 'active' ? 'bg-green-50 text-green-700' : 'text-slate-500 hover:text-slate-700' }}">
+							Active Only
+						</a>
+						<a href="/recruiter/jobs?filter=archived" class="px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap {{ currentFilter == 'archived' ? 'bg-red-50 text-red-700' : 'text-slate-500 hover:text-slate-700' }}">
+							Archived
+						</a>
+					</div>
+
+					<div class="overflow-x-auto">
+						<table class="w-full text-left text-sm text-slate-600">
+							<thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500">
+								<tr>
+									<th class="px-6 py-4">Job Title</th>
+									<th class="px-6 py-4">Company</th>
+									<th class="px-6 py-4">Category</th>
+									<th class="px-6 py-4">Posted Date</th>
+									<th class="px-6 py-4">Status</th>
+									<th class="px-6 py-4 text-right">Actions</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-slate-100">
+								{% for offer in offers %}
+									<tr class="hover:bg-slate-50/50 transition-colors">
+										<td class="px-6 py-4">
+											<div class="font-semibold text-slate-800">{{ offer.titre }}</div>
+											<div class="text-xs text-slate-400">ID: #{{ offer.id }}</div>
+										</td>
+										<td class="px-6 py-4">
+											<div class="flex items-center gap-2">
+												<div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 uppercase">
+													{{ offer.nom_entreprise|slice(0, 1) }}
+												</div>
+												<div>
+													<div class="font-medium text-slate-900">{{ offer.nom_entreprise }}</div>
+													<div class="text-xs text-slate-400">by {{ offer.recruteur_nom }}</div>
+												</div>
+											</div>
+										</td>
+										<td class="px-6 py-4">
+											<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+												{{ offer.category_name }}
+											</span>
+										</td>
+										<td class="px-6 py-4 text-slate-500">
+											{{ offer.created_at|date('M d, Y') }}
+										</td>
+										<td class="px-6 py-4">
+											{% if offer.deleted_at %}
+												<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100">
+													<span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+													Archived
+												</span>
+											{% else %}
+												<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
+													<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+													Active
+												</span>
+											{% endif %}
+										</td>
+										<td class="px-6 py-4 text-right">
+											<div class="flex items-center justify-end gap-2">
+												{% if offer.deleted_at %}
+													<form action="/recruiter/jobs/{{ offer.id }}/restore" method="POST" class="inline">
+														<button type="submit" class="px-3 py-1.5 text-sm text-green-600 hover:bg-green-50 rounded-lg font-medium transition-colors">
+															Restore
+														</button>
+													</form>
+												{% else %}
+													<button onclick='openEditModal({{ offer|json_encode }})' class="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg font-medium transition-colors">
+														Edit
+													</button>
+													<button onclick="openArchiveModal({{ offer.id }}, '{{ offer.titre|e('js') }}')" class="px-3 py-1.5 text-sm text-amber-600 hover:bg-amber-50 rounded-lg font-medium transition-colors">
+														Archive
+													</button>
+													<button onclick="openDeleteModal({{ offer.id }}, '{{ offer.titre|e('js') }}')" class="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
+														Delete
+													</button>
+												{% endif %}
+											</div>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="6" class="px-6 py-12 text-center text-slate-400 bg-slate-50/50">
+											<div class="flex flex-col items-center">
+												<svg class="w-8 h-8 mb-2 text-slate-300" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+												</svg>
+												No offers found for this filter.
+											</div>
+										</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<!-- Archive Confirmation Modal -->
+		<div id="archiveModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full">
+				<div class="p-6">
+					<div class="flex items-center justify-center w-12 h-12 mx-auto bg-amber-100 rounded-full mb-4">
+						<svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+						</svg>
+					</div>
+					<h3 class="text-lg font-bold text-slate-800 text-center mb-2">Archive Job Offer?</h3>
+					<p class="text-sm text-slate-500 text-center mb-6">
+						Are you sure you want to archive "<span id="archiveJobTitle" class="font-semibold text-slate-700"></span>"? This job will be hidden from active listings but can be restored later.
+					</p>
+					<div class="flex gap-3">
+						<button onclick="closeArchiveModal()" class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+							Cancel
+						</button>
+						<form id="archiveForm" method="POST" class="flex-1">
+							<button type="submit" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors">
+								Archive Job
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Delete Confirmation Modal -->
+		<div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full">
+				<div class="p-6">
+					<div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+						<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+						</svg>
+					</div>
+					<h3 class="text-lg font-bold text-slate-800 text-center mb-2">Permanently Delete Job?</h3>
+					<p class="text-sm text-slate-500 text-center mb-6">
+						Are you sure you want to permanently delete "<span id="deleteJobTitle" class="font-semibold text-slate-700"></span>"? <strong class="text-red-600">This action cannot be undone!</strong>
+					</p>
+					<div class="flex gap-3">
+						<button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+							Cancel
+						</button>
+						<form id="deleteForm" method="POST" class="flex-1">
+							<button type="submit" class="w-full px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+								Delete Forever
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Create Job Modal -->
+		<div id="createModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+				<div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+					<h2 class="text-xl font-bold text-slate-800">Create New Job Offer</h2>
+					<button onclick="closeCreateModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+
+				<form action="/recruiter/jobs/store" method="POST" class="p-6">
+					<div class="space-y-5">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Job Title *</label>
+								<input type="text" name="titre" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="e.g., Senior Full Stack Developer">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Company *</label>
+								<select name="company_id" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+									<option value="">Select Company</option>
+									{% for company in companies %}
+										<option value="{{ company.id }}">{{ company.nom_entreprise }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium text-slate-700 mb-2">Description *</label>
+							<textarea name="description" required rows="4" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Describe the role, responsibilities, and requirements..."></textarea>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Category *</label>
+								<select name="category_id" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+									<option value="">Select Category</option>
+									{% for category in categories %}
+										<option value="{{ category.id }}">{{ category.nom }}</option>
+									{% endfor %}
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Salary (MAD)</label>
+								<input type="number" name="salaire" step="0.01" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="15000">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Location *</label>
+								<input type="text" name="lieu" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="Casablanca">
+							</div>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+							<select name="status" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+								<option value="active">Active</option>
+								<option value="inactive">Inactive</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-100">
+						<button type="button" onclick="closeCreateModal()" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+							Cancel
+						</button>
+						<button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm shadow-indigo-200">
+							Create Job Offer
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Edit Job Modal -->
+		<div id="editModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
+			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+				<div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+					<h2 class="text-xl font-bold text-slate-800">Edit Job Offer</h2>
+					<button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+
+				<form id="editForm" action="" method="POST" class="p-6">
+					<div class="space-y-5">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Job Title *</label>
+								<input type="text" id="edit_titre" name="titre" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Company *</label>
+								<select id="edit_company_id" name="company_id" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+									<option value="">Select Company</option>
+									{% for company in companies %}
+										<option value="{{ company.id }}">{{ company.nom_entreprise }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium text-slate-700 mb-2">Description *</label>
+							<textarea id="edit_description" name="description" required rows="4" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"></textarea>
+						</div>
+
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Category *</label>
+								<select id="edit_category_id" name="category_id" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+									<option value="">Select Category</option>
+									{% for category in categories %}
+										<option value="{{ category.id }}">{{ category.nom }}</option>
+									{% endfor %}
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Salary (MAD)</label>
+								<input type="number" id="edit_salaire" name="salaire" step="0.01" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">Location *</label>
+								<input type="text" id="edit_lieu" name="lieu" required class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+							</div>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+							<select id="edit_status" name="status" class="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+								<option value="active">Active</option>
+								<option value="inactive">Inactive</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-slate-100">
+						<button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+							Cancel
+						</button>
+						<button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm shadow-indigo-200">
+							Update Job Offer
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script>
+			// Archive Modal Functions
+			function openArchiveModal(id, title) {
+				document.getElementById('archiveJobTitle').textContent = title;
+				document.getElementById('archiveForm').action = '/recruiter/jobs/' + id + '/archive';
+				document.getElementById('archiveModal').classList.add('active');
+				document.body.style.overflow = 'hidden';
+			}
+
+			function closeArchiveModal() {
+				document.getElementById('archiveModal').classList.remove('active');
+				document.body.style.overflow = 'auto';
+			}
+
+			// Delete Modal Functions
+			function openDeleteModal(id, title) {
+				document.getElementById('deleteJobTitle').textContent = title;
+				document.getElementById('deleteForm').action = '/recruiter/jobs/' + id + '/delete';
+				document.getElementById('deleteModal').classList.add('active');
+				document.body.style.overflow = 'hidden';
+			}
+
+			function closeDeleteModal() {
+				document.getElementById('deleteModal').classList.remove('active');
+				document.body.style.overflow = 'auto';
+			}
+
+			// Create Modal Functions
+			function openCreateModal() {
+				document.getElementById('createModal').classList.add('active');
+				document.body.style.overflow = 'hidden';
+			}
+
+			function closeCreateModal() {
+				document.getElementById('createModal').classList.remove('active');
+				document.body.style.overflow = 'auto';
+			}
+
+			// Edit Modal Functions
+			function openEditModal(offer) {
+				document.getElementById('edit_titre').value = offer.titre;
+				document.getElementById('edit_company_id').value = offer.company_id;
+				document.getElementById('edit_description').value = offer.description;
+				document.getElementById('edit_category_id').value = offer.category_id;
+				document.getElementById('edit_salaire').value = offer.salaire || '';
+				document.getElementById('edit_lieu').value = offer.lieu;
+				document.getElementById('edit_status').value = offer.status;
+				
+				document.getElementById('editForm').action = '/recruiter/jobs/' + offer.id + '/update';
+				document.getElementById('editModal').classList.add('active');
+				document.body.style.overflow = 'hidden';
+			}
+
+			function closeEditModal() {
+				document.getElementById('editModal').classList.remove('active');
+				document.body.style.overflow = 'auto';
+			}
+
+			// Close modals on ESC key
+			document.addEventListener('keydown', function(event) {
+				if (event.key === 'Escape') {
+					closeCreateModal();
+					closeEditModal();
+					closeArchiveModal();
+					closeDeleteModal();
+				}
+			});
+
+			// Close modals when clicking outside
+			document.getElementById('createModal').addEventListener('click', function(e) {
+				if (e.target === this) {
+					closeCreateModal();
+				}
+			});
+
+			document.getElementById('editModal').addEventListener('click', function(e) {
+				if (e.target === this) {
+					closeEditModal();
+				}
+			});
+
+			document.getElementById('archiveModal').addEventListener('click', function(e) {
+				if (e.target === this) {
+					closeArchiveModal();
+				}
+			});
+
+			document.getElementById('deleteModal').addEventListener('click', function(e) {
+				if (e.target === this) {
+					closeDeleteModal();
+				}
+			});
+		</script>
+	</body>
+</html>

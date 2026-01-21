@@ -13,7 +13,6 @@ use App\Services\ValidatorService;
 use App\Controllers\AuthController;
 use App\Controllers\Admin\JobOfferController;
 use App\Controllers\Admin\StatisticsController;
-// [NEW 1] Import the ApplicationController
 use App\Controllers\Admin\ApplicationController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
@@ -30,7 +29,7 @@ $twig = new \Twig\Environment($loader, [
 ]);
 
 $twig->addExtension(new \Twig\Extension\DebugExtension());
-$twig->addFunction(new \Twig\TwigFunction('url', function($path) {
+$twig->addFunction(new \Twig\TwigFunction('url', function ($path) {
     return '/' . ltrim($path, '/');
 }));
 
@@ -41,25 +40,21 @@ $userRepository = new UserRepository($db);
 $validatorService = new ValidatorService();
 $authService = new AuthService($userRepository);
 
-// initialize controllers
-$controllers = [
-    'auth' => new AuthController($authService, $validatorService),
-    'jobOffer' => new JobOfferController(),
-    'statistics' => new StatisticsController(),
-    // [NEW 2] Initialize the ApplicationController
-    'applications' => new ApplicationController()
-];
+// Load all controllers from controllers.php
+$controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
+$controllers = $controllerLoader($twig, $db);
 
-// load admin controllers
-$adminControllerLoader = require __DIR__ . '/../app/Config/controllers.php';
-$adminControllers = $adminControllerLoader($twig, $db);
-$controllers = array_merge($controllers, $adminControllers);
+// Add auth controller and other specific controllers
+$controllers['auth'] = new AuthController($authService, $validatorService);
+$controllers['adminJobOffer'] = new JobOfferController();
+$controllers['adminStatistics'] = new StatisticsController();
+$controllers['adminApplications'] = new ApplicationController();
 
 // initialize middlewares
 $middlewares = [
     'auth' => new AuthMiddleware(),
+    'recruiter' => new RoleMiddleware(['recruiter', 'recruteur']), 
     'admin' => new RoleMiddleware(['admin']),
-    'recruiter' => new RoleMiddleware(['recruiter', 'recruteur']),
     'candidate' => new RoleMiddleware(['candidate', 'candidat'])
 ];
 
@@ -85,62 +80,62 @@ foreach ($routeFiles as $file) {
 }
 
 // --- Admin Job Offer Routes ---
-$router->get('/admin/offers', function() use ($controllers) {
-    $controllers['jobOffer']->index();
+$router->get('/admin/offers', function () use ($controllers) {
+    $controllers['adminJobOffer']->index();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-$router->get('/admin/offers/archive/(\d+)', function($id) use ($controllers) {
-    $controllers['jobOffer']->archive($id);
+$router->get('/admin/offers/archive/(\d+)', function ($id) use ($controllers) {
+    $controllers['adminJobOffer']->archive($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-$router->get('/admin/offers/restore/(\d+)', function($id) use ($controllers) {
-    $controllers['jobOffer']->restore($id);
+$router->get('/admin/offers/restore/(\d+)', function ($id) use ($controllers) {
+    $controllers['adminJobOffer']->restore($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 
 // --- Admin Statistics Routes ---
-$router->get('/admin/statistics', function() use ($controllers) {
-    $controllers['statistics']->index();
+$router->get('/admin/statistics', function () use ($controllers) {
+    $controllers['adminStatistics']->index();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-$router->get('/admin/statistics/export', function() use ($controllers) {
-    $controllers['statistics']->export();
+$router->get('/admin/statistics/export', function () use ($controllers) {
+    $controllers['adminStatistics']->export();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 
-// [NEW 3] Admin Application Management Routes
-$router->get('/admin/applications', function() use ($controllers) {
-    $controllers['applications']->index();
+// Admin Application Management Routes
+$router->get('/admin/applications', function () use ($controllers) {
+    $controllers['adminApplications']->index();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-$router->get('/admin/applications/block/(\d+)', function($id) use ($controllers) {
-    $controllers['applications']->blockCandidate($id);
+$router->get('/admin/applications/block/(\d+)', function ($id) use ($controllers) {
+    $controllers['adminApplications']->blockCandidate($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
-$router->get('/admin/applications/unblock/(\d+)', function($id) use ($controllers) {
-    $controllers['applications']->unblockCandidate($id);
+$router->get('/admin/applications/unblock/(\d+)', function ($id) use ($controllers) {
+    $controllers['adminApplications']->unblockCandidate($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 
 // Protected routes - Dashboard redirect
-$router->get('/dashboard', function() use ($authService) {
+$router->get('/dashboard', function () use ($authService) {
     if (!$authService->isLoggedIn()) {
         header('Location: /login');
         exit;
     }
-    
+
     $user = $authService->getCurrentUser();
-    
+
     if (!$user || !isset($user['role_id'])) {
         $authService->logout();
         header('Location: /login');
         exit;
     }
-    
+
     // redirect based on role
     switch ($user['role_id']) {
         case 1:
-            header('Location: /admin/dashboard'); 
+            header('Location: /admin/dashboard');
             break;
         case 2:
             header('Location: /recruiter/dashboard');
@@ -156,11 +151,11 @@ $router->get('/dashboard', function() use ($authService) {
 }, [$middlewares['auth']]);
 
 // change password routes
-$router->get('/change-password', function() use ($controllers) {
+$router->get('/change-password', function () use ($controllers) {
     $controllers['auth']->showChangePasswordForm();
 }, [$middlewares['auth']]);
 
-$router->post('/change-password', function() use ($controllers) {
+$router->post('/change-password', function () use ($controllers) {
     $controllers['auth']->changePassword();
 }, [$middlewares['auth']]);
 
