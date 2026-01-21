@@ -30,33 +30,32 @@ return function (Router $router, $controllers, $middlewares) {
             $controllers['user']->store();
         });
         
-        // Alternative route for pending (keeps old links working)
-        $router->get('/users/pending', function () use ($controllers) {
-            $controllers['adminUser']->pending();
+        $router->get('/users/{id}/edit', function($id) use ($controllers) {
+            $controllers['user']->edit($id);
         });
-
-        $router->post('/users/verify/{id}', function ($id) use ($controllers) {
-            $controllers['adminUser']->verify($id);
+        
+        $router->post('/users/{id}', function($id) use ($controllers) {
+            $controllers['user']->update($id);
         });
-
-        $router->post('/users/reject/{id}', function ($id) use ($controllers) {
-            $controllers['adminUser']->reject($id);
+        
+        $router->post('/users/{id}/delete', function($id) use ($controllers) {
+            $controllers['user']->destroy($id);
         });
         
         // --- Category Management ---
         $router->get('/categories', function() use ($controllers) {
             $controllers['category']->index();
         });
-
-        $router->post('/categories/store', function () use ($controllers) {
+        
+        $router->post('/categories/store', function() use ($controllers) {
             $controllers['category']->store();
         });
-
-        $router->post('/categories/update/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/categories/update/{id}', function($id) use ($controllers) {
             $controllers['category']->update($id);
         });
-
-        $router->post('/categories/delete/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/categories/delete/{id}', function($id) use ($controllers) {
             $controllers['category']->destroy($id);
         });
         
@@ -64,41 +63,61 @@ return function (Router $router, $controllers, $middlewares) {
         $router->get('/tags', function() use ($controllers) {
             $controllers['tag']->index();
         });
-
-        $router->post('/tags/store', function () use ($controllers) {
+        
+        $router->post('/tags/store', function() use ($controllers) {
             $controllers['tag']->store();
         });
-
-        $router->post('/tags/update/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/tags/update/{id}', function($id) use ($controllers) {
             $controllers['tag']->update($id);
         });
-
-        $router->post('/tags/delete/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/tags/delete/{id}', function($id) use ($controllers) {
             $controllers['tag']->destroy($id);
         });
         
         // --- Job Offers Management ---
-        // [FIX] Key changed to 'jobOffer' to match index.php
+        // [FIX] Changed 'job' to 'jobOffer' to match index.php
         $router->get('/jobs', function() use ($controllers) {
             $controllers['jobOffer']->index();
         });
-
-        // Update these too so they match the pattern
-        $router->get('/jobs/archive/{id}', function($id) use ($controllers) {
+        
+        $router->get('/jobs/create', function() use ($controllers) {
+            $controllers['jobOffer']->create();
+        });
+        
+        $router->post('/jobs', function() use ($controllers) {
+            $controllers['jobOffer']->store();
+        });
+        
+        $router->get('/jobs/{id}/edit', function($id) use ($controllers) {
+            $controllers['jobOffer']->edit($id);
+        });
+        
+        $router->post('/jobs/{id}', function($id) use ($controllers) {
+            $controllers['jobOffer']->update($id);
+        });
+        
+        // [FIX] Changed to match the archive method signature
+        $router->post('/jobs/{id}/archive', function($id) use ($controllers) {
             $controllers['jobOffer']->archive($id);
         });
         
-        $router->get('/jobs/restore/{id}', function($id) use ($controllers) {
+        $router->post('/jobs/{id}/restore', function($id) use ($controllers) {
             $controllers['jobOffer']->restore($id);
         });
         
+        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
+            $controllers['jobOffer']->destroy($id);
+        });
+        
         // --- Applications Management ---
-        // [FIX] Key changed to 'applications' (plural) to match index.php
+        // [FIX] Changed 'application' to 'applications' (plural) to match index.php
         $router->get('/applications', function() use ($controllers) {
             $controllers['applications']->index();
         });
         
-        // [FIX] Updated to use blockCandidate/unblockCandidate
+        // [FIX] Updated to use blockCandidate/unblockCandidate methods
         $router->get('/applications/block/{id}', function($id) use ($controllers) {
             $controllers['applications']->blockCandidate($id);
         });
@@ -120,16 +139,16 @@ return function (Router $router, $controllers, $middlewares) {
         $router->get('/roles', function() use ($controllers) {
             $controllers['role']->index();
         });
-
-        $router->post('/roles/store', function () use ($controllers) {
+        
+        $router->post('/roles/store', function() use ($controllers) {
             $controllers['role']->store();
         });
-
-        $router->post('/roles/update/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/roles/update/{id}', function($id) use ($controllers) {
             $controllers['role']->update($id);
         });
-
-        $router->post('/roles/delete/{id}', function ($id) use ($controllers) {
+        
+        $router->post('/roles/delete/{id}', function($id) use ($controllers) {
             $controllers['role']->destroy($id);
         });
     });
