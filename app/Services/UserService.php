@@ -1,16 +1,13 @@
 <?php
 namespace App\Services;
-use App\Services\ValidatorService;
 use App\Repository\UserRepository;
 class UserService
 {
     private UserRepository $userRepository;
-    private ValidatorService $validator;
     
-    public function __construct(UserRepository $userRepository, ValidatorService $validator)
+    public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
-        $this->validator = $validator;
     }
     
     public function getAllUsers(): array
