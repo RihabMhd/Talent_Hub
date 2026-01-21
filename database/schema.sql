@@ -281,3 +281,28 @@ ALTER TABLE `users`
 COMMIT;
 
 
+CREATE TABLE candidates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Informations personnelles
+    nom VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+
+    -- Profil candidat
+    telephone VARCHAR(20),
+    skills TEXT,
+    experience_annee INT DEFAULT 0,
+    expected_salaire DECIMAL(10,2),
+
+    -- CV upload
+    cv_path VARCHAR(255),
+
+    -- Rôle & statut
+    role ENUM('candidat') DEFAULT 'candidat',
+    is_active BOOLEAN DEFAULT TRUE,
+
+    -- Sécurité & audit
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
