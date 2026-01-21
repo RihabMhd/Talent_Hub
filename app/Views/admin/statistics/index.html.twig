@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistics | TalentHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Clean scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
+
+    {# Sidebar #}
+    {% include 'admin/sidebar.html.twig' %}
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50">
+        
+        <header class="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 shadow-sm z-10">
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">Platform Analytics</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Overview of current performance</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <a href="/admin/statistics/export" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 text-sm font-medium transform hover:scale-[1.02]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span>Export CSV</span>
+                </a>
+                <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
+                    {{ session.user.name|slice(0,1)|upper }}
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                
+                <div class="bg-white p-6 rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex items-center gap-5 transition-transform hover:scale-[1.01]">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-slate-800">
+                            {% set total_u = 0 %}
+                            {% for u in stats.users_count %}
+                                {% set total_u = total_u + u.count %}
+                            {% endfor %}
+                            {{ total_u }}
+                        </div>
+                        <div class="text-sm font-medium text-slate-400">Total Users</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex items-center gap-5 transition-transform hover:scale-[1.01]">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-bold text-slate-800">
+                             {% set total_j = 0 %}
+                            {% for j in stats.jobs_by_category %}
+                                {% set total_j = total_j + j.count %}
+                            {% endfor %}
+                            {{ total_j }}
+                        </div>
+                        <div class="text-sm font-medium text-slate-400">Active Job Offers</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex items-center gap-5 transition-transform hover:scale-[1.01]">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-xl font-bold text-slate-800 truncate" title="{{ stats.top_companies[0].nom_entreprise }}">
+                            {{ stats.top_companies[0].nom_entreprise ?? 'N/A' }}
+                        </div>
+                        <div class="text-sm font-medium text-slate-400">Top Recruiter</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">Jobs by Category</h3>
+                    </div>
+                    <div class="relative h-72 w-full flex-1">
+                        <canvas id="jobsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-slate-800">User Demographics</h3>
+                        <a href="/admin/users" class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full hover:bg-indigo-100 transition">View All</a>
+                    </div>
+                    <div class="relative h-72 w-full flex justify-center items-center">
+                        <canvas id="usersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                     <h3 class="text-lg font-bold text-slate-800">Top Recruiters</h3>
+                     <span class="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">This Month</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-50/50 font-semibold tracking-wider">
+                            <tr>
+                                <th class="px-8 py-4 pl-10">Company</th>
+                                <th class="px-8 py-4">Active Jobs</th>
+                                <th class="px-8 py-4">Contribution</th>
+                                <th class="px-8 py-4 text-right pr-10">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for company in stats.top_companies %}
+                            <tr class="hover:bg-slate-50/80 transition-colors">
+                                <td class="px-8 py-4 pl-10 font-medium text-slate-900 flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shadow-sm">
+                                        {{ company.nom_entreprise|slice(0,1)|upper }}
+                                    </div>
+                                    {{ company.nom_entreprise }}
+                                </td>
+                                <td class="px-8 py-4 font-semibold text-slate-700">{{ company.count }}</td>
+                                <td class="px-8 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-full bg-slate-100 rounded-full h-2 max-w-[100px] overflow-hidden">
+                                            <div class="bg-indigo-500 h-2 rounded-full" style="width: {{ (company.count / total_j * 100)|round }}%"></div>
+                                        </div>
+                                        <span class="text-xs text-slate-400">{{ (company.count / total_j * 100)|round }}%</span>
+                                    </div>
+                                </td>
+                                <td class="px-8 py-4 pr-10 text-right">
+                                    <span class="inline-flex items-center gap-1.5 text-emerald-600 font-semibold text-xs bg-emerald-50 px-3 py-1 rounded-full">
+                                        Active
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Global Defaults
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#f1f5f9';
+
+        // 1. Jobs Bar Chart
+        const jobsCtx = document.getElementById('jobsChart').getContext('2d');
+        const jobsGradient = jobsCtx.createLinearGradient(0, 0, 0, 300);
+        jobsGradient.addColorStop(0, '#6366f1'); // Indigo 500
+        jobsGradient.addColorStop(1, '#a5b4fc'); // Indigo 300
+
+        new Chart(jobsCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for item in stats.jobs_by_category %}"{{ item.name }}",{% endfor %}],
+                datasets: [{
+                    label: 'Jobs',
+                    data: [{% for item in stats.jobs_by_category %}{{ item.count }},{% endfor %}],
+                    backgroundColor: jobsGradient,
+                    hoverBackgroundColor: '#4f46e5',
+                    borderRadius: 8,
+                    barThickness: 35,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { borderDash: [4, 4], drawBorder: false },
+                        ticks: { padding: 10 }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false }
+                    }
+                }
+            }
+        });
+
+        // 2. Users Doughnut Chart
+        const usersCtx = document.getElementById('usersChart').getContext('2d');
+        new Chart(usersCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for item in stats.users_count %}"{{ item.name }}",{% endfor %}],
+                datasets: [{
+                    data: [{% for item in stats.users_count %}{{ item.count }},{% endfor %}],
+                    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'], 
+                    borderWidth: 6,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, padding: 20, font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
