@@ -12,8 +12,9 @@ use App\Services\AuthService;
 use App\Services\ValidatorService;
 use App\Controllers\AuthController;
 use App\Controllers\Admin\JobOfferController;
-// [NEW 1] Import the StatisticsController
-use App\Controllers\Admin\StatisticsController; 
+use App\Controllers\Admin\StatisticsController;
+// [NEW 1] Import the ApplicationController
+use App\Controllers\Admin\ApplicationController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 
@@ -44,8 +45,9 @@ $authService = new AuthService($userRepository);
 $controllers = [
     'auth' => new AuthController($authService, $validatorService),
     'jobOffer' => new JobOfferController(),
-    // [NEW 2] Initialize the StatisticsController
-    'statistics' => new StatisticsController() 
+    'statistics' => new StatisticsController(),
+    // [NEW 2] Initialize the ApplicationController
+    'applications' => new ApplicationController()
 ];
 
 // load admin controllers
@@ -96,13 +98,27 @@ $router->get('/admin/offers/restore/(\d+)', function($id) use ($controllers) {
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 
-// [NEW 3] Admin Statistics Routes
+// --- Admin Statistics Routes ---
 $router->get('/admin/statistics', function() use ($controllers) {
     $controllers['statistics']->index();
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 $router->get('/admin/statistics/export', function() use ($controllers) {
     $controllers['statistics']->export();
+}, [$middlewares['auth'], $middlewares['admin']]);
+
+
+// [NEW 3] Admin Application Management Routes
+$router->get('/admin/applications', function() use ($controllers) {
+    $controllers['applications']->index();
+}, [$middlewares['auth'], $middlewares['admin']]);
+
+$router->get('/admin/applications/block/(\d+)', function($id) use ($controllers) {
+    $controllers['applications']->blockCandidate($id);
+}, [$middlewares['auth'], $middlewares['admin']]);
+
+$router->get('/admin/applications/unblock/(\d+)', function($id) use ($controllers) {
+    $controllers['applications']->unblockCandidate($id);
 }, [$middlewares['auth'], $middlewares['admin']]);
 
 

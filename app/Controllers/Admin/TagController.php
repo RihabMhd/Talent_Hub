@@ -52,7 +52,7 @@ class TagController
     {
         if (empty($_POST['nom'])) {
             $_SESSION['error'] = 'Tag name is required';
-            header('Location: /admin/tags.html.twig');
+            header('Location: /admin/tags');
             exit;
         }
 
@@ -64,7 +64,7 @@ class TagController
             $_SESSION['error'] = 'Failed to create Tag';
         }
 
-        header('Location: /admin/tags.html.twig');
+        header('Location: /admin/tags');
         exit;
     }
 
@@ -84,7 +84,7 @@ class TagController
             $_SESSION['error'] = 'Tag not found';
         }
 
-        header('Location: /admin/tags.html.twig');
+        header('Location: /admin/tags');
         exit;
     }
 
@@ -98,7 +98,7 @@ class TagController
             $_SESSION['error'] = 'Tag not found';
         }
 
-        header('Location: /admin/tags.html.twig');
+        header('Location: /admin/tags');
         exit;
     }
 }

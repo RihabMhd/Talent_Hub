@@ -1,9 +1,6 @@
 <?php
 
 use App\Config\Router;
-use App\Config\Twig;
-use App\Middleware\AuthMiddleware;
-use App\Middleware\RoleMiddleware;
 
 return function(Router $router, $controllers, $middlewares) {
     $authMiddleware = $middlewares['auth'];
@@ -15,12 +12,12 @@ return function(Router $router, $controllers, $middlewares) {
         'middlewares' => [$authMiddleware, $adminMiddleware]
     ], function($router) use ($controllers) {
         
-        // dashboard
+        // Dashboard
         $router->get('/dashboard', function() use ($controllers) {
             $controllers['dashboard']->index();
         });
         
-        // User Management
+        // --- User Management ---
         $router->get('/users', function() use ($controllers) {
             $controllers['user']->index();
         });
@@ -45,7 +42,7 @@ return function(Router $router, $controllers, $middlewares) {
             $controllers['user']->destroy($id);
         });
         
-        // Category Management
+        // --- Category Management ---
         $router->get('/categories', function() use ($controllers) {
             $controllers['category']->index();
         });
@@ -62,7 +59,7 @@ return function(Router $router, $controllers, $middlewares) {
             $controllers['category']->destroy($id);
         });
         
-        // Tag Management
+        // --- Tag Management ---
         $router->get('/tags', function() use ($controllers) {
             $controllers['tag']->index();
         });
@@ -79,66 +76,46 @@ return function(Router $router, $controllers, $middlewares) {
             $controllers['tag']->destroy($id);
         });
         
-        // Job Offers Management
+        // --- Job Offers Management ---
+        // [FIX] Key changed to 'jobOffer' to match index.php
         $router->get('/jobs', function() use ($controllers) {
-            $controllers['job']->index();
+            $controllers['jobOffer']->index();
+        });
+
+        // Update these too so they match the pattern
+        $router->get('/jobs/archive/{id}', function($id) use ($controllers) {
+            $controllers['jobOffer']->archive($id);
         });
         
-        $router->get('/jobs/create', function() use ($controllers) {
-            $controllers['job']->create();
+        $router->get('/jobs/restore/{id}', function($id) use ($controllers) {
+            $controllers['jobOffer']->restore($id);
         });
         
-        $router->post('/jobs', function() use ($controllers) {
-            $controllers['job']->store();
-        });
-        
-        $router->get('/jobs/{id}/edit', function($id) use ($controllers) {
-            $controllers['job']->edit($id);
-        });
-        
-        $router->post('/jobs/{id}', function($id) use ($controllers) {
-            $controllers['job']->update($id);
-        });
-        
-        $router->post('/jobs/{id}/archive', function($id) use ($controllers) {
-            $controllers['job']->archive($id);
-        });
-        
-        $router->post('/jobs/{id}/restore', function($id) use ($controllers) {
-            $controllers['job']->restore($id);
-        });
-        
-        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
-            $controllers['job']->destroy($id);
-        });
-        
-        // Applications Management
+        // --- Applications Management ---
+        // [FIX] Key changed to 'applications' (plural) to match index.php
         $router->get('/applications', function() use ($controllers) {
-            $controllers['application']->index();
+            $controllers['applications']->index();
         });
         
-        $router->get('/applications/{id}', function($id) use ($controllers) {
-            $controllers['application']->show($id);
+        // [FIX] Updated to use blockCandidate/unblockCandidate
+        $router->get('/applications/block/{id}', function($id) use ($controllers) {
+            $controllers['applications']->blockCandidate($id);
         });
         
-        $router->post('/applications/{id}/approve', function($id) use ($controllers) {
-            $controllers['application']->approve($id);
+        $router->get('/applications/unblock/{id}', function($id) use ($controllers) {
+            $controllers['applications']->unblockCandidate($id);
         });
         
-        $router->post('/applications/{id}/reject', function($id) use ($controllers) {
-            $controllers['application']->reject($id);
-        });
-        
-        $router->post('/applications/{id}/delete', function($id) use ($controllers) {
-            $controllers['application']->destroy($id);
-        });
-        
-        // Statistics
+        // --- Statistics ---
         $router->get('/statistics', function() use ($controllers) {
             $controllers['statistics']->index();
         });
         
-        // Roles Management
+        $router->get('/statistics/export', function() use ($controllers) {
+            $controllers['statistics']->export();
+        });
+        
+        // --- Roles Management ---
         $router->get('/roles', function() use ($controllers) {
             $controllers['role']->index();
         });
