@@ -36,14 +36,58 @@ class UserRepository
         return $user ?: null;
     }
     
+    public function findPendingVerification(): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM users 
+             WHERE is_verified = 0 
+             ORDER BY created_at DESC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    
+    public function findVerified(): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM users 
+             WHERE is_verified = 1 
+             ORDER BY verified_at DESC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    
+    public function verifyUser(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE users 
+             SET is_verified = 1, 
+                 verified_at = NOW(),
+                 updated_at = NOW()
+             WHERE id = :id"
+        );
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+    
+    public function rejectUser(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "DELETE FROM users WHERE id = :id AND is_verified = 0"
+        );
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+    
     public function create(array $userData): ?int
     {
         $nom = $userData['nom'] ?? '';
         $prenom = $userData['prenom'] ?? '';
         
         $stmt = $this->db->prepare(
-            "INSERT INTO users (nom, prenom, email, password, role_id) 
-             VALUES (:nom, :prenom, :email, :password, :role_id)"
+            "INSERT INTO users (nom, prenom, email, password, role_id, is_verified) 
+             VALUES (:nom, :prenom, :email, :password, :role_id, 0)"
         );
         
         $stmt->bindParam(':nom', $nom);
@@ -78,7 +122,8 @@ class UserRepository
         
         $stmt = $this->db->prepare(
             "UPDATE users 
-             SET nom = :nom, prenom = :prenom, email = :email, role_id = :role_id 
+             SET nom = :nom, prenom = :prenom, email = :email, role_id = :role_id,
+                 updated_at = NOW()
              WHERE id = :id"
         );
         
