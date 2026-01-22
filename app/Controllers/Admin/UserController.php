@@ -18,7 +18,7 @@ class UserController
     {
         $users = $this->userService->getAllUsers();
         
-        echo $this->twig->render('admin/users/index.html.twig', [
+        echo $this->twig->render('admin/users/pending.html.twig', [
             'users' => $users,
             'current_user' => $_SESSION['user'] ?? null,
             'session' => $_SESSION ?? [],

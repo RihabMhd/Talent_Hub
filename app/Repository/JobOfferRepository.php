@@ -2,35 +2,22 @@
 namespace App\Repository;
 
 use PDO;
+use App\Config\Database;
 
 class JobOfferRepository
 {
     private PDO $db;
 
-    public function __construct(PDO $db)
+    public function __construct()
     {
-        $this->db = $db;
+        // Initialize DB connection internally to match other repositories
+        $this->db = (new Database())->getConnection();
     }
 
-    public function findAll(): array
-    {
-        $sql = "SELECT o.*, 
-                       comp.nom_entreprise, 
-                       u.nom AS recruteur_nom, 
-                       u.prenom AS recruteur_prenom, 
-                       cat.nom AS category_name 
-                FROM offres o
-                JOIN companies comp ON o.company_id = comp.id
-                JOIN users u ON comp.user_id = u.id
-                JOIN categories cat ON o.category_id = cat.id
-                WHERE o.deleted_at IS NULL
-                ORDER BY o.created_at ASC";
-        
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function findAllWithFilter(string $filter = 'all'): array
+    /**
+     * Used by Controller: index()
+     */
+    public function findAllForAdmin(string $filter = 'all'): array
     {
         $sql = "SELECT o.*, 
                        comp.nom_entreprise, 
@@ -43,9 +30,9 @@ class JobOfferRepository
                 JOIN categories cat ON o.category_id = cat.id";
 
         if ($filter === 'active') {
-            $sql .= " WHERE o.deleted_at IS NULL";
+            $sql .= " WHERE o.status = 'active' AND o.deleted_at IS NULL";
         } elseif ($filter === 'archived') {
-            $sql .= " WHERE o.deleted_at IS NOT NULL";
+            $sql .= " WHERE (o.deleted_at IS NOT NULL OR o.status = 'archived')";
         }
         
         $sql .= " ORDER BY o.created_at DESC";
@@ -53,6 +40,9 @@ class JobOfferRepository
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Used by Controller: edit()
+     */
     public function findById(int $id): ?array
     {
         $sql = "SELECT o.*, 
@@ -73,50 +63,45 @@ class JobOfferRepository
         return $result ?: null;
     }
 
-    public function create(array $data): ?int
+    /**
+     * Used by Controller: edit() to populate dropdowns
+     */
+    public function getAllCategories(): array
     {
-        $sql = "INSERT INTO offres 
-                (titre, description, company_id, category_id, lieu, type_contrat, salaire, status, created_at) 
-                VALUES 
-                (:titre, :description, :company_id, :category_id, :lieu, :type_contrat, :salaire, 'active', NOW())";
-        
-        $stmt = $this->db->prepare($sql);
-        $success = $stmt->execute([
-            'titre' => $data['titre'],
-            'description' => $data['description'],
-            'company_id' => $data['company_id'],
-            'category_id' => $data['category_id'],
-            'lieu' => $data['lieu'] ?? null,
-            'type_contrat' => $data['type_contrat'] ?? null,
-            'salaire' => $data['salaire'] ?? null
-        ]);
-        
-        return $success ? (int)$this->db->lastInsertId() : null;
+        $sql = "SELECT * FROM categories ORDER BY nom ASC";
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Used by Controller: update()
+     */
     public function update(int $id, array $data): bool
     {
+        // [FIX] Removed 'type_contrat' because it does not exist in your Schema
         $sql = "UPDATE offres 
                 SET titre = :titre, 
                     description = :description, 
                     category_id = :category_id, 
                     lieu = :lieu, 
-                    type_contrat = :type_contrat, 
-                    salaire = :salaire
+                    salaire = :salaire,
+                    status = :status
                 WHERE id = :id";
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            'titre' => $data['titre'],
+            'titre' => $data['title'],         // Matches Controller key
             'description' => $data['description'],
             'category_id' => $data['category_id'],
-            'lieu' => $data['lieu'] ?? null,
-            'type_contrat' => $data['type_contrat'] ?? null,
-            'salaire' => $data['salaire'] ?? null,
+            'lieu' => $data['location'],       // Matches Controller key
+            'salaire' => $data['salary'],      // Matches Controller key
+            'status' => $data['status'],
             'id' => $id
         ]);
     }
 
+    /**
+     * Used by Controller: archive()
+     */
     public function softDelete(int $id): bool
     {
         $sql = "UPDATE offres SET deleted_at = NOW(), status = 'archived' WHERE id = :id";
@@ -124,6 +109,9 @@ class JobOfferRepository
         return $stmt->execute(['id' => $id]);
     }
 
+    /**
+     * Used by Controller: restore()
+     */
     public function restore(int $id): bool
     {
         $sql = "UPDATE offres SET deleted_at = NULL, status = 'active' WHERE id = :id";
@@ -138,7 +126,10 @@ class JobOfferRepository
         return $stmt->execute(['id' => $id]);
     }
 
-    public function getStatsByCompany(): array
+    /**
+     * Used by Controller: index() for KPI cards
+     */
+    public function countOffersPerRecruiter(): array
     {
         $sql = "SELECT comp.nom_entreprise, COUNT(o.id) as total_offres 
                 FROM companies comp
@@ -146,7 +137,7 @@ class JobOfferRepository
                 WHERE o.deleted_at IS NULL
                 GROUP BY comp.id, comp.nom_entreprise
                 ORDER BY total_offres DESC
-                LIMIT 5";
+                LIMIT 4";
                 
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
