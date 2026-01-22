@@ -296,12 +296,7 @@ class ApplicationRepository
     /**
      * Delete a candidature
      */
-    public function deleteCandidature(int $id): bool
-    {
-        $stmt = $this->db->prepare("DELETE FROM candidatures WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        return $stmt->execute();
-    }
+   
 
     /**
      * Block a Candidate (Set is_active = 0)
@@ -349,37 +344,10 @@ class ApplicationRepository
     /**
      * Check if user already applied to an offer
      */
-    public function hasApplied($userId, $offreId)
-    {
-        $sql = "SELECT COUNT(*) as count 
-                FROM candidatures 
-                WHERE user_id = :user_id AND offre_id = :offre_id";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            'user_id' => $userId,
-            'offre_id' => $offreId
-        ]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['count'] > 0;
-    }
 
     /**
      * Create a new application
      */
-    public function create($data)
-    {
-        $sql = "INSERT INTO candidatures (user_id, offre_id, message_motivation, cv_path, status, date_postulation)
-                VALUES (:user_id, :offre_id, :message_motivation, :cv_path, 'en_attente', NOW())";
-        
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            'user_id' => $data['user_id'],
-            'offre_id' => $data['offre_id'],
-            'message_motivation' => $data['message_motivation'] ?? null,
-            'cv_path' => $data['cv_path']
-        ]);
-    }
 
     /**
      * Get application count by offer ID
@@ -434,5 +402,25 @@ class ApplicationRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['offre_id' => $offreId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function deleteCandidature(int $id): bool
+{
+    $stmt = $this->db->prepare("DELETE FROM candidatures WHERE id = :id");
+    $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+    return $stmt->execute();
+}
+public function hasApplied($userId, $offerId) {
+        $sql = "SELECT COUNT(*) FROM candidatures WHERE user_id = :uid AND offre_id = :oid";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    // Save the new application
+    public function create($userId, $offerId) {
+        $sql = "INSERT INTO candidatures (user_id, offre_id,cv_path,status, date_postulation) 
+                VALUES (:uid, :oid,'your cv', 'en_attente', NOW())";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
     }
 }

@@ -11,12 +11,17 @@ use App\Repository\UserRepository;
 use App\Services\AuthService;
 use App\Services\ValidatorService;
 use App\Controllers\AuthController;
+use App\Controllers\JobController;
 use App\Controllers\Admin\JobOfferController;
 use App\Controllers\Admin\StatisticsController;
 use App\Controllers\Admin\ApplicationController;
 use App\Controllers\Candidate\ProfileController; // Import Candidate Controller
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
+use App\Controllers\Candidate\ApplicationController as CandidateAppController;
+// ... other imports ...
+// use App\Controllers\Candidate\ApplicationController as CandidateAppController; // <--- ADD THIS
+
 
 // initialize database connection
 $database = new Database();
@@ -48,7 +53,9 @@ $controllers = [
     'jobOffer' => new JobOfferController(),
     'statistics' => new StatisticsController(),
     'applications' => new ApplicationController(),
-    'candidateProfile' => new ProfileController()
+    'candidateProfile' => new ProfileController(),
+    'job' => new JobController(),
+    'candidateApplication' => new CandidateAppController()
 ];
 
 // 2. Load extra controllers from config (if any)

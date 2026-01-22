@@ -17,6 +17,15 @@ return function(Router $router, $controllers) {
     
     // logout
     $router->get('/logout', [$authController, 'logout']);
+    $router->get('/jobs', function() use ($controllers) {
+        $controllers['job']->index();
+    });
+    $router->post('/candidate/applications/apply/{id}', [
+    $controllers['candidateApplication'], 'apply'
+]);
+    $router->get('/jobs/{id}', function($id) use ($controllers) {
+    $controllers['job']->show($id);
+});
     
     // 403 Forbidden page
     $router->get('/403', function() {

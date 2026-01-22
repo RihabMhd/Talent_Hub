@@ -29,7 +29,8 @@ return function(Router $router, $controllers, $middlewares) {
         $router->post('/profile/update', function() use ($controllers) {
             $controllers['candidateProfile']->update();
         });
-
-        
+        $router->post('/applications/apply/{id}', function($id) use ($controllers) {
+            $controllers['candidateApplication']->apply($id);
+        });
     });
 };
