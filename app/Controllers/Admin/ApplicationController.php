@@ -1,7 +1,7 @@
 <?php
 namespace App\Controllers\Admin;
 
-use App\Repository\ApplicationRepository; // [FIX] Use Repository
+use App\Repository\ApplicationRepository; 
 use App\Config\Twig; 
 
 class ApplicationController {
@@ -9,14 +9,13 @@ class ApplicationController {
     private $applicationRepository;
 
     public function __construct() {
-        // [FIX] Initialize Repository
         $this->applicationRepository = new ApplicationRepository();
     }
 
     public function index() {
         $this->checkAdmin();
 
-        // [FIX] Use repository methods
+        
         $applications = $this->applicationRepository->findAllWithDetails();
         $stats = $this->applicationRepository->getStatusStats();
 

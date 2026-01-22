@@ -29,5 +29,7 @@ return function(Router $router, $controllers, $middlewares) {
         $router->post('/profile/update', function() use ($controllers) {
             $controllers['candidateProfile']->update();
         });
+
+        
     });
 };
