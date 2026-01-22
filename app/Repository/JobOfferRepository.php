@@ -141,4 +141,46 @@ class JobOfferRepository
                 
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
-}
+    public function findFullOffer($id) {
+        // [FIX] Use LEFT JOIN instead of JOIN
+        // This ensures the job loads even if the company or category is missing/deleted
+        $sql = "SELECT o.*, 
+                       c.nom_entreprise, c.adresse_entreprise, c.site_web, 
+                       cat.nom as category_name
+                FROM offres o
+                LEFT JOIN companies c ON o.company_id = c.id
+                LEFT JOIN categories cat ON o.category_id = cat.id
+                WHERE o.id = :id"; 
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Fetch tags for a specific offer
+    public function getTagsByOfferId($id) {
+        $sql = "SELECT t.* FROM tags t
+                JOIN offre_tag ot ON t.id = ot.tag_id
+                WHERE ot.offre_id = :id";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
+    public function findAllActive() {
+    // [FIX] Use LEFT JOIN so offers show up even if Company/Category is missing/deleted
+    $sql = "SELECT o.*, 
+                   c.nom_entreprise, 
+                   cat.nom as category_name 
+            FROM offres o
+            LEFT JOIN companies c ON o.company_id = c.id
+            LEFT JOIN categories cat ON o.category_id = cat.id
+            WHERE o.status = 'active'
+            ORDER BY o.created_at DESC";
+    
+    return $this->db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+
+    }
+}   

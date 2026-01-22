@@ -97,4 +97,18 @@ class ApplicationRepository {
     $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
     return $stmt->execute();
 }
+public function hasApplied($userId, $offerId) {
+        $sql = "SELECT COUNT(*) FROM candidatures WHERE user_id = :uid AND offre_id = :oid";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
+        return $stmt->fetchColumn() > 0;
+    }
+
+    // Save the new application
+    public function create($userId, $offerId) {
+        $sql = "INSERT INTO candidatures (user_id, offre_id,cv_path,status, date_postulation) 
+                VALUES (:uid, :oid,'your cv', 'en_attente', NOW())";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
+    }
 }
