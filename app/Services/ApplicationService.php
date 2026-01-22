@@ -60,8 +60,6 @@ class ApplicationService {
             $result = $this->applicationRepository->acceptCandidature($applicationId);
             
             if ($result) {
-                // You could add email notification here
-                // $this->sendAcceptanceEmail($applicationId);
                 return true;
             }
             
