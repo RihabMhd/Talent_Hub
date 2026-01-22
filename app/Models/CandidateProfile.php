@@ -2,74 +2,165 @@
 
 namespace App\Models ;
 
-class CandidateProfile {
-
-    private $id;
-    private $user_id;
-    private $offre_id;
-    private $message_motivation;
-    private $cv_path;
-    private $status;
-    private $date_postulation;
 
 
-    public function __construct($data = []){
-          $this->id = $data['id'] ;
-          $this->user_id = $data['user_id'] ;
-          $this->offre_id = $data['offre_id'] ;
-          $this->message_motivation = $data['message_motivation'] ;
-          $this->cv_path = $data['cv_path'] ;
-          $this->status = $data['status'] ;
-          $this->date_postulation = $data['date_postulation'] ;
+class Candidate
+{
+    private ?int $id;
+    private string $fullName;
+    private string $email;
+    private string $password;
+    private ?string $phone;
+    private ?string $skills;
+    private int $experienceYears;
+    private ?float $expectedSalary;
+    private ?string $cvPath;
+    private string $role;
+    private bool $isActive;
+    private ?string $createdAt;
+    private ?string $updatedAt;
+
+    public function __construct(
+        ?int $id = null,
+        string $fullName = '',
+        string $email = '',
+        string $password = '',
+        ?string $phone = null,
+        ?string $skills = null,
+        int $experienceYears = 0,
+        ?float $expectedSalary = null,
+        ?string $cvPath = null,
+        string $role = 'candidat',
+        bool $isActive = true,
+        ?string $createdAt = null,
+        ?string $updatedAt = null
+    ) {
+        $this->id = $id;
+        $this->fullName = $fullName;
+        $this->email = $email;
+        $this->password = $password;
+        $this->phone = $phone;
+        $this->skills = $skills;
+        $this->experienceYears = $experienceYears;
+        $this->expectedSalary = $expectedSalary;
+        $this->cvPath = $cvPath;
+        $this->role = $role;
+        $this->isActive = $isActive;
+        $this->createdAt = $createdAt;
+        $this->updatedAt = $updatedAt;
     }
 
-    public function getId(){
-        return $this->id ;
-    }
-    public function getuser_id(){
-        return $this->user_id ;
-    }
-    public function getoffer_id(){
-        return $this->offer_id ;
-    }
-    public function getmessagemotivation(){
-        return $this->messagemotivation ;
-    }
-    public function getcv_path(){
-        return $this->cv_path ;
-    }
-    public function getstatus(){
-        return $this->status ;
-    }
-    public function getdate_postulation(){
-        return $this->date_postulation ;
+   
+
+    public function getId(): ?int
+    {
+        return $this->id;
     }
 
-
-
-
-    public function setId($id){
-        $this->id = $id ;
-    }
-    public function setuser_id($user_id){
-        $this->user_id = $user_id ;
-    }
-    public function setoffer_id($offer_id){
-        $this->offer_id = $offer_id ;
-    }
-    public function setmeasage_motivation($measage_motivation){
-        $this->measage_motivation = $measage_motivation ;
-    }
-    public function setcv_path($cv_path){
-        $this->cv_path = $cv_path ;
-    }
-    public function setstatus($status){
-        $this->status = $status ;
-    }
-    public function setdate_postulation($date_postulation){
-        $this->date_postulation = $date_postulation ;
+    public function getFullName(): string
+    {
+        return $this->fullName;
     }
 
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
 
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
 
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function getSkills(): ?string
+    {
+        return $this->skills;
+    }
+
+    public function getExperienceYears(): int
+    {
+        return $this->experienceYears;
+    }
+
+    public function getExpectedSalary(): ?float
+    {
+        return $this->expectedSalary;
+    }
+
+    public function getCvPath(): ?string
+    {
+        return $this->cvPath;
+    }
+
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        return $this->updatedAt;
+    }
+
+   
+
+    public function setFullName(string $fullName): void
+    {
+        $this->fullName = $fullName;
+    }
+
+    public function setEmail(string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function setPhone(?string $phone): void
+    {
+        $this->phone = $phone;
+    }
+
+    public function setSkills(?string $skills): void
+    {
+        $this->skills = $skills;
+    }
+
+    public function setExperienceYears(int $years): void
+    {
+        $this->experienceYears = $years;
+    }
+
+    public function setExpectedSalary(?float $salary): void
+    {
+        $this->expectedSalary = $salary;
+    }
+
+    public function setCvPath(?string $cvPath): void
+    {
+        $this->cvPath = $cvPath;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->isActive = $isActive;
+    }
 }

@@ -14,6 +14,7 @@ use App\Controllers\AuthController;
 use App\Controllers\Admin\JobOfferController;
 use App\Controllers\Admin\StatisticsController;
 use App\Controllers\Admin\ApplicationController;
+use App\Controllers\Candidate\ProfileController; // Import Candidate Controller
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 
@@ -40,7 +41,6 @@ $userRepository = new UserRepository($db);
 $validatorService = new ValidatorService();
 $authService = new AuthService($userRepository);
 
-<<<<<<< HEAD
 // --- INITIALIZE CONTROLLERS ---
 // 1. Start with your manual definitions
 $controllers = [
@@ -58,17 +58,6 @@ if (file_exists(__DIR__ . '/../app/Config/controllers.php')) {
  
     $controllers = array_merge($extraControllers, $controllers);
 }
-=======
-// Load all controllers from controllers.php
-$controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
-$controllers = $controllerLoader($twig, $db);
-
-// Add auth controller and other specific controllers
-$controllers['auth'] = new AuthController($authService, $validatorService);
-$controllers['adminJobOffer'] = new JobOfferController();
-$controllers['adminStatistics'] = new StatisticsController();
-$controllers['adminApplications'] = new ApplicationController();
->>>>>>> parent of 6cc9305 (Merge pull request #16 from RihabMhd/feature/candidateProfile)
 
 // initialize middlewares
 $middlewares = [
@@ -98,44 +87,6 @@ foreach ($routeFiles as $file) {
         }
     }
 }
-
-// --- Admin Job Offer Routes ---
-$router->get('/admin/offers', function () use ($controllers) {
-    $controllers['adminJobOffer']->index();
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-$router->get('/admin/offers/archive/(\d+)', function ($id) use ($controllers) {
-    $controllers['adminJobOffer']->archive($id);
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-$router->get('/admin/offers/restore/(\d+)', function ($id) use ($controllers) {
-    $controllers['adminJobOffer']->restore($id);
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-
-// --- Admin Statistics Routes ---
-$router->get('/admin/statistics', function () use ($controllers) {
-    $controllers['adminStatistics']->index();
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-$router->get('/admin/statistics/export', function () use ($controllers) {
-    $controllers['adminStatistics']->export();
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-
-// Admin Application Management Routes
-$router->get('/admin/applications', function () use ($controllers) {
-    $controllers['adminApplications']->index();
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-$router->get('/admin/applications/block/(\d+)', function ($id) use ($controllers) {
-    $controllers['adminApplications']->blockCandidate($id);
-}, [$middlewares['auth'], $middlewares['admin']]);
-
-$router->get('/admin/applications/unblock/(\d+)', function ($id) use ($controllers) {
-    $controllers['adminApplications']->unblockCandidate($id);
-}, [$middlewares['auth'], $middlewares['admin']]);
-
 
 // Protected routes - Dashboard redirect
 $router->get('/dashboard', function () use ($authService) {
@@ -180,7 +131,4 @@ $router->post('/change-password', function () use ($controllers) {
 }, [$middlewares['auth']]);
 
 // dispatch the request
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-$requestUri = $_SERVER['REQUEST_URI'];
-
-$router->dispatch($requestMethod, $requestUri);
+$router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);

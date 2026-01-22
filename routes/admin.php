@@ -109,11 +109,17 @@ return function (Router $router, $controllers, $middlewares) {
             $controllers['adminJobOffer']->destroy($id);
         });
         
+        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
+            $controllers['jobOffer']->destroy($id);
+        });
+        
         // --- Applications Management ---
+        // [FIX] Changed 'application' to 'applications' (plural) to match index.php
         $router->get('/applications', function() use ($controllers) {
             $controllers['adminApplications']->index();
         });
         
+        // [FIX] Updated to use blockCandidate/unblockCandidate methods
         $router->get('/applications/block/{id}', function($id) use ($controllers) {
             $controllers['adminApplications']->blockCandidate($id);
         });
