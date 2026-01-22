@@ -15,62 +15,63 @@ return function(Router $router, $controllers, $middlewares) {
         'middlewares' => [$authMiddleware, $recruiterMiddleware]
     ], function($router) use ($controllers) {
         
-        // dashboard
-        $router->get('/dashboard', function() {
-            Twig::render('recruiter/dashboard.twig');
+        // Dashboard
+        $router->get('/dashboard', function() use ($controllers) {
+            $controllers['recruiterDashboard']->index();
         });
         
-        // job Offers Management
-        $router->get('/jobs', function() {
-            echo "Recruiter - My Job Offers";
+        // Job Offers Management
+        $router->get('/jobs', function() use ($controllers) {
+            $controllers['recruiterJobOffer']->index();
         });
         
-        $router->get('/jobs/create', function() {
-            echo "Recruiter - Create Job Offer";
+        // Create job offer
+        $router->post('/jobs/store', function() use ($controllers) {
+            $controllers['recruiterJobOffer']->store();
         });
         
-        $router->post('/jobs', function() {
-            echo "Recruiter - Store Job Offer";
+        // Update job offer
+        $router->post('/jobs/{id}/update', function($id) use ($controllers) {
+            $controllers['recruiterJobOffer']->update($id);
         });
         
-        $router->get('/jobs/{id}', function() {
-            echo "Recruiter - View Job Offer";
+        // Archive job offer
+        $router->post('/jobs/{id}/archive', function($id) use ($controllers) {
+            $controllers['recruiterJobOffer']->archive($id);
         });
         
-        $router->get('/jobs/{id}/edit', function() {
-            echo "Recruiter - Edit Job Offer";
+        // Restore job offer
+        $router->post('/jobs/{id}/restore', function($id) use ($controllers) {
+            $controllers['recruiterJobOffer']->restore($id);
         });
         
-        $router->post('/jobs/{id}', function() {
-            echo "Recruiter - Update Job Offer";
+        // Delete job offer
+        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
+            $controllers['recruiterJobOffer']->delete($id);
         });
         
-        $router->post('/jobs/{id}/delete', function() {
-            echo "Recruiter - Delete Job Offer";
-        });
-        
-        // applications Management
+        // Applications Management
         $router->get('/applications', function() {
             echo "Recruiter - All Applications";
         });
         
-        $router->get('/jobs/{id}/applications', function() {
-            echo "Recruiter - Job Applications";
+        $router->get('/jobs/{id}/applications', function($id) {
+            echo "Recruiter - Job Applications for ID: " . $id;
         });
         
-        $router->get('/applications/{id}', function() {
-            echo "Recruiter - View Application";
+        $router->get('/applications/{id}', function($id) {
+            echo "Recruiter - View Application ID: " . $id;
         });
         
-        $router->post('/applications/{id}/accept', function() {
-            echo "Recruiter - Accept Application";
+        $router->post('/applications/{id}/accept', function($id) {
+            echo "Recruiter - Accept Application ID: " . $id;
         });
         
-        $router->post('/applications/{id}/reject', function() {
-            echo "Recruiter - Reject Application";
+        $router->post('/applications/{id}/reject', function($id) {
+            echo "Recruiter - Reject Application ID: " . $id;
         });
         
-        // company Profile
+        // Company Profile
         $router->get('/company', function() {
             echo "Recruiter - Company Profile";
         });

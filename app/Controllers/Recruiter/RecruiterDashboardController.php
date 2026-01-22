@@ -2,7 +2,7 @@
 
 namespace App\Controllers\Recruiter;
 
-class DashboardController
+class RecruiterDashboardController
 {
     private $twig;
     private $db;

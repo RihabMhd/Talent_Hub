@@ -30,7 +30,7 @@ $twig = new \Twig\Environment($loader, [
 ]);
 
 $twig->addExtension(new \Twig\Extension\DebugExtension());
-$twig->addFunction(new \Twig\TwigFunction('url', function($path) {
+$twig->addFunction(new \Twig\TwigFunction('url', function ($path) {
     return '/' . ltrim($path, '/');
 }));
 
@@ -54,12 +54,21 @@ $controllers = [
 $adminControllerLoader = require __DIR__ . '/../app/Config/controllers.php';
 $adminControllers = $adminControllerLoader($twig, $db);
 $controllers = array_merge($controllers, $adminControllers);
+// Load all controllers from controllers.php
+$controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
+$controllers = $controllerLoader($twig, $db);
+
+// Add auth controller and other specific controllers
+$controllers['auth'] = new AuthController($authService, $validatorService);
+$controllers['adminJobOffer'] = new JobOfferController();
+$controllers['adminStatistics'] = new StatisticsController();
+$controllers['adminApplications'] = new ApplicationController();
 
 // initialize middlewares
 $middlewares = [
     'auth' => new AuthMiddleware(),
+    'recruiter' => new RoleMiddleware(['recruiter', 'recruteur']), 
     'admin' => new RoleMiddleware(['admin']),
-    'recruiter' => new RoleMiddleware(['recruiter', 'recruteur']),
     'candidate' => new RoleMiddleware(['candidate', 'candidat'])
 ];
 
@@ -89,24 +98,24 @@ foreach ($routeFiles as $file) {
 }
 
 // Protected routes - Dashboard redirect
-$router->get('/dashboard', function() use ($authService) {
+$router->get('/dashboard', function () use ($authService) {
     if (!$authService->isLoggedIn()) {
         header('Location: /login');
         exit;
     }
-    
+
     $user = $authService->getCurrentUser();
-    
+
     if (!$user || !isset($user['role_id'])) {
         $authService->logout();
         header('Location: /login');
         exit;
     }
-    
+
     // redirect based on role
     switch ($user['role_id']) {
         case 1:
-            header('Location: /admin/dashboard'); 
+            header('Location: /admin/dashboard');
             break;
         case 2:
             header('Location: /recruiter/dashboard');
@@ -122,11 +131,11 @@ $router->get('/dashboard', function() use ($authService) {
 }, [$middlewares['auth']]);
 
 // change password routes
-$router->get('/change-password', function() use ($controllers) {
+$router->get('/change-password', function () use ($controllers) {
     $controllers['auth']->showChangePasswordForm();
 }, [$middlewares['auth']]);
 
-$router->post('/change-password', function() use ($controllers) {
+$router->post('/change-password', function () use ($controllers) {
     $controllers['auth']->changePassword();
 }, [$middlewares['auth']]);
 
