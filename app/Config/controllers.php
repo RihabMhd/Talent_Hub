@@ -13,6 +13,7 @@ use App\Controllers\Recruiter\ApplicationController as RecruiterApplicationContr
 use App\Controllers\Recruiter\RecruiterDashboardController;
 use App\Controllers\Recruiter\JobOfferController as RecruiterJobOfferController;
 use App\Controllers\AuthController;
+use App\Controllers\Admin\StatisticsController;
 use App\Controllers\Admin\AdminUserController;
 use App\Services\UserVerificationService;
 use App\Repository\ApplicationRepository;
@@ -34,13 +35,14 @@ return function($twig, $db) {
     $userRepository = new UserRepository($db);
     $jobOfferRepository = new JobOfferRepository($db);
     $verificationService = new UserVerificationService($userRepository);
+    $applicationRepository=new ApplicationRepository($db);
 
     // Initialize Services
     $categoryService = new CategoryService($categoryRepository);
     $tagService = new TagService($tagRepository);
     $userService = new UserService($userRepository);
     $jobOfferService = new JobOfferService($jobOfferRepository);
-    // $applicationService = new ApplicationService($applicationRepository);
+    $applicationService = new ApplicationService($applicationRepository);
 
     return [
         // Admin Controllers
@@ -49,10 +51,10 @@ return function($twig, $db) {
         'tag' => new TagController($tagService, $twig),
         'adminUser' => new AdminUserController($verificationService, $twig),
         'user' => new UserController($userService, $twig),
-        'job' => new \App\Controllers\Admin\JobOfferController(),
-        // 'application' => new ApplicationController($applicationService, $twig),
+        'adminJobOffer' => new \App\Controllers\Admin\JobOfferController(),
+        'adminApplications' => new ApplicationController($applicationService, $twig),
         // 'role' => new RoleController($twig, $db),
-        // 'statistics' => new StatisticsController($twig, $db),
+        'adminStatistics' => new StatisticsController($twig, $db),
 
         // Recruiter Controllers
         'recruiterDashboard' => new RecruiterDashboardController($twig, $db),
@@ -60,7 +62,7 @@ return function($twig, $db) {
         // 'recruiterApplications' => new RecruiterApplicationController($applicationService, $twig),
 
         // Candidate Controllers
-        // 'candidateProfile' => new ProfileController($userService, $twig),
+        'candidateProfile' => new ProfileController($userService, $twig),
         // 'candidateJobs' => new CandidateJobController($jobOfferService, $twig),
         // 'candidateApplications' => new CandidateApplicationController($applicationService, $twig),
 

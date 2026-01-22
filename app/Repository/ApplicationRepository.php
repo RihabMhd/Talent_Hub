@@ -42,7 +42,6 @@ class ApplicationRepository {
      * Block a Candidate (Set is_active = 0)
      */
     public function blockUser($userId) {
-        // [FIX] Schema uses 'is_active' (tinyint), not 'status' (varchar)
         $sql = "UPDATE users SET is_active = 0 WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['id' => $userId]);
@@ -64,4 +63,38 @@ class ApplicationRepository {
         $sql = "SELECT status, COUNT(*) as count FROM candidatures GROUP BY status";
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Accept a candidature (Update status to 'acceptee')
+     */
+    public function acceptCandidature(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE candidatures 
+             SET status = 'acceptee'
+             WHERE id = :id"
+        );
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+    
+    /**
+     * Reject a candidature (Update status to 'refusee')
+     */
+    public function rejectCandidature(int $id): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE candidatures 
+             SET status = 'refusee'
+             WHERE id = :id"
+        );
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+    public function deleteCandidature(int $id): bool
+{
+    $stmt = $this->db->prepare("DELETE FROM candidatures WHERE id = :id");
+    $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+    return $stmt->execute();
+}
 }
