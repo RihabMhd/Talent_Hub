@@ -22,7 +22,7 @@ use App\Middleware\RoleMiddleware;
 $database = new Database();
 $db = $database->getConnection();
 
-// initialize twig (Used by Admin Controllers via controllers.php)
+// initialize twig
 $loader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/../app/views');
 $twig = new \Twig\Environment($loader, [
     'cache' => false,
@@ -41,28 +41,23 @@ $userRepository = new UserRepository($db);
 $validatorService = new ValidatorService();
 $authService = new AuthService($userRepository);
 
-// initialize controllers
+// --- INITIALIZE CONTROLLERS ---
+// 1. Start with your manual definitions
 $controllers = [
     'auth' => new AuthController($authService, $validatorService),
     'jobOffer' => new JobOfferController(),
     'statistics' => new StatisticsController(),
     'applications' => new ApplicationController(),
-    'candidateProfile' => new ProfileController() // Register Candidate Controller
+    'candidateProfile' => new ProfileController()
 ];
 
-// load admin controllers (legacy loader)
-$adminControllerLoader = require __DIR__ . '/../app/Config/controllers.php';
-$adminControllers = $adminControllerLoader($twig, $db);
-$controllers = array_merge($controllers, $adminControllers);
-// Load all controllers from controllers.php
-$controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
-$controllers = $controllerLoader($twig, $db);
-
-// Add auth controller and other specific controllers
-$controllers['auth'] = new AuthController($authService, $validatorService);
-$controllers['adminJobOffer'] = new JobOfferController();
-$controllers['adminStatistics'] = new StatisticsController();
-$controllers['adminApplications'] = new ApplicationController();
+// 2. Load extra controllers from config (if any)
+if (file_exists(__DIR__ . '/../app/Config/controllers.php')) {
+    $controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
+    $extraControllers = $controllerLoader($twig, $db);
+ 
+    $controllers = array_merge($extraControllers, $controllers);
+}
 
 // initialize middlewares
 $middlewares = [
@@ -76,12 +71,11 @@ $middlewares = [
 $router = new Router();
 
 // load route files
-// Make sure the file names in your folder match these EXACTLY
 $routeFiles = [
     __DIR__ . '/../routes/web.php',
-    __DIR__ . '/../routes/admin.php',      // Handles all /admin routes
+    __DIR__ . '/../routes/admin.php',
     __DIR__ . '/../routes/recruiter.php',
-    __DIR__ . '/../routes/candidate.php',  // Ensure file is named 'candidate.php'
+    __DIR__ . '/../routes/candidate.php',
     __DIR__ . '/../routes/api.php'
 ];
 
@@ -91,9 +85,6 @@ foreach ($routeFiles as $file) {
         if (is_callable($routeLoader)) {
             $routeLoader($router, $controllers, $middlewares);
         }
-    } else {
-        // Optional: Debugging line to see which file is missing
-        // echo "Warning: Route file not found: " . $file . "<br>";
     }
 }
 
