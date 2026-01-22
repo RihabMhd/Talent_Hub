@@ -1,90 +1,72 @@
 <?php
-namespace App\Controllers\Candidate;
 
-use App\Repository\CandidateRepository;
-use App\Config\Twig;
+namespace App\Controllers;
 
-class ProfileController {
-    
+use App\Repository\CandidateProfileRepository;
+
+class CandidateProfileController
+{
     private $candidateRepo;
 
-    public function __construct() {
-        $this->candidateRepo = new CandidateRepository();
+    public function __construct()
+    {
+        $this->candidateRepo = new CandidateProfileRepository();
     }
 
-    public function dashboard() {
-        $this->checkCandidate();
-        echo Twig::render('candidate/dashboard.twig', ['session' => $_SESSION, 'current_user' => $_SESSION['user']]);
+    public function getByUserId($user_id)
+    {
+        $candidatures = $this->candidateRepo->findByUserId($user_id);
+        return $candidatures;
     }
 
-    // [NEW] View Profile (Read Only)
-    public function show() {
-        $this->checkCandidate();
-        
-        $userId = $_SESSION['user']['id'];
-        $profile = $this->candidateRepo->findByUserId($userId);
-
-        echo Twig::render('candidate/show.twig', [
-            'profile' => $profile,
-            'session' => $_SESSION,
-            'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
-        ]);
-        unset($_SESSION['success'], $_SESSION['error']);
-    }
-
-    // [UPDATED] Show Edit Form
-    public function edit() {
-        $this->checkCandidate();
-        
-        $userId = $_SESSION['user']['id'];
-        $profile = $this->candidateRepo->findByUserId($userId);
-        $allTags = $this->candidateRepo->getAllTags();
-        $selectedTagIds = array_column($profile['tags'] ?? [], 'id');
-
-        echo Twig::render('candidate/edit.twig', [
-            'profile' => $profile,
-            'allTags' => $allTags,
-            'selectedTagIds' => $selectedTagIds,
-            'session' => $_SESSION,
-            'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
-        ]);
-    }
-
-    public function update() {
-        $this->checkCandidate();
-        $userId = $_SESSION['user']['id'];
-
+    public function store()
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
             $data = [
-                'nom' => $_POST['nom'],
-                'prenom' => $_POST['prenom'],
-                'titre' => $_POST['titre'],
-                'telephone' => $_POST['telephone'],
-                'adresse' => $_POST['adresse'],
-                'salaire_min' => $_POST['salaire_min'] ?: null,
-                'disponibilite' => $_POST['disponibilite'],
-                'experience' => $_POST['experience']
+                'user_id'             => $_POST['user_id'],
+                'offre_id'            => $_POST['offre_id'],
+                'message_motivation' => $_POST['message_motivation'],
+                'cv_path'             => $_POST['cv_path'],
+                'status'              => $_POST['status'],
+                'date_postulation'   => date('Y-m-d'),
             ];
-            $tags = $_POST['tags'] ?? []; 
 
-            if ($this->candidateRepo->updateProfile($userId, $data, $tags)) {
-                $_SESSION['success'] = "Profile updated successfully!";
-                $_SESSION['user']['name'] = $data['nom'] . ' ' . $data['prenom'];
+            if ($this->candidateRepo->create($data)) {
+                echo "Candidature ajoutée avec succès";
             } else {
-                $_SESSION['error'] = "Failed to update profile.";
+                echo "Erreur lors de l'ajout";
             }
-
-            // Redirect back to the View page
-            header('Location: /candidate/profile');
-            exit();
         }
     }
 
-    private function checkCandidate() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
-        if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] !== 3) {
-            header('Location: /login');
-            exit();
+    public function update($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+            $data = [
+                'user_id'             => $_POST['user_id'],
+                'offre_id'            => $_POST['offre_id'],
+                'message_motivation' => $_POST['message_motivation'],
+                'cv_path'             => $_POST['cv_path'],
+                'status'              => $_POST['status'],
+                'date_postulation'   => $_POST['date_postulation'],
+            ];
+
+            if ($this->candidateRepo->update($id, $data)) {
+                echo "Candidature mise à jour";
+            } else {
+                echo "Erreur lors de la mise à jour";
+            }
+        }
+    }
+
+    public function delete($id)
+    {
+        if ($this->candidateRepo->delete($id)) {
+            echo "Candidature supprimée";
+        } else {
+            echo "Erreur lors de la suppression";
         }
     }
 }
