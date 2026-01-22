@@ -5,78 +5,94 @@ use App\Config\Twig;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 
-return function(Router $router, $controllers, $middlewares) {
+return function (Router $router, $controllers, $middlewares) {
     $authMiddleware = $middlewares['auth'];
     $recruiterMiddleware = $middlewares['recruiter'];
-    
+
     // recruiter routes group
     $router->group([
         'prefix' => '/recruiter',
         'middlewares' => [$authMiddleware, $recruiterMiddleware]
-    ], function($router) use ($controllers) {
-        
+    ], function ($router) use ($controllers) {
+
         // Dashboard
-        $router->get('/dashboard', function() use ($controllers) {
+        $router->get('/dashboard', function () use ($controllers) {
             $controllers['recruiterDashboard']->index();
         });
-        
+
         // Job Offers Management
-        $router->get('/jobs', function() use ($controllers) {
+        $router->get('/jobs', function () use ($controllers) {
             $controllers['recruiterJobOffer']->index();
         });
-        
+
         // Create job offer
-        $router->post('/jobs/store', function() use ($controllers) {
+        $router->post('/jobs/store', function () use ($controllers) {
             $controllers['recruiterJobOffer']->store();
         });
-        
+
         // Update job offer
-        $router->post('/jobs/{id}/update', function($id) use ($controllers) {
+        $router->post('/jobs/{id}/update', function ($id) use ($controllers) {
             $controllers['recruiterJobOffer']->update($id);
         });
-        
+
         // Archive job offer
-        $router->post('/jobs/{id}/archive', function($id) use ($controllers) {
+        $router->post('/jobs/{id}/archive', function ($id) use ($controllers) {
             $controllers['recruiterJobOffer']->archive($id);
         });
-        
+
         // Restore job offer
-        $router->post('/jobs/{id}/restore', function($id) use ($controllers) {
+        $router->post('/jobs/{id}/restore', function ($id) use ($controllers) {
             $controllers['recruiterJobOffer']->restore($id);
         });
-        
+
         // Delete job offer
-        $router->post('/jobs/{id}/delete', function($id) use ($controllers) {
+        $router->post('/jobs/{id}/delete', function ($id) use ($controllers) {
             $controllers['recruiterJobOffer']->delete($id);
         });
+
+        // ===================================
+        // APPLICATIONS MANAGEMENT
+        // ===================================
         
-        // Applications Management
-        $router->get('/applications', function() {
-            echo "Recruiter - All Applications";
+        // View all applications for recruiter's job offers
+        $router->get('/applications', function () use ($controllers) {
+            $controllers['recruiterApplications']->index();
         });
-        
-        $router->get('/jobs/{id}/applications', function($id) {
-            echo "Recruiter - Job Applications for ID: " . $id;
+
+        // Filter applications by status (en_attente, acceptee, refusee)
+        $router->get('/applications/filter', function () use ($controllers) {
+            $controllers['recruiterApplications']->filterByStatus();
         });
-        
-        $router->get('/applications/{id}', function($id) {
-            echo "Recruiter - View Application ID: " . $id;
+
+        // Search applications by candidate name/email
+        $router->get('/applications/search', function () use ($controllers) {
+            $controllers['recruiterApplications']->search();
         });
-        
-        $router->post('/applications/{id}/accept', function($id) {
-            echo "Recruiter - Accept Application ID: " . $id;
+
+        // View specific candidate application details
+        $router->get('/applications/view/{id}', function ($id) use ($controllers) {
+            $controllers['recruiterApplications']->viewCandidate($id);
         });
-        
-        $router->post('/applications/{id}/reject', function($id) {
-            echo "Recruiter - Reject Application ID: " . $id;
+
+        // Accept a candidate's application (POST)
+        $router->post('/applications/accepter/{id}', function ($id) use ($controllers) {
+            $controllers['recruiterApplications']->accept($id);
         });
+
+        // Reject a candidate's application (POST)
+        $router->post('/applications/refuser/{id}', function ($id) use ($controllers) {
+            $controllers['recruiterApplications']->reject($id);
+        });
+
+        // ===================================
+        // COMPANY PROFILE
+        // ===================================
         
-        // Company Profile
-        $router->get('/company', function() {
+        $router->get('/company', function () {
             echo "Recruiter - Company Profile";
         });
-        
-        $router->post('/company', function() {
+
+        $router->post('/company', function () {
             echo "Recruiter - Update Company";
         });
     });

@@ -21,7 +21,6 @@ use App\Repository\CategoryRepository;
 use App\Repository\JobOfferRepository;
 use App\Repository\TagRepository;
 use App\Repository\UserRepository;
-
 use App\Services\ApplicationService;
 use App\Services\CategoryService;
 use App\Services\JobOfferService;
@@ -53,18 +52,17 @@ return function($twig, $db) {
         'user' => new UserController($userService, $twig),
         'adminJobOffer' => new \App\Controllers\Admin\JobOfferController(),
         'adminApplications' => new ApplicationController($applicationService, $twig),
-        // 'role' => new RoleController($twig, $db),
         'adminStatistics' => new StatisticsController($twig, $db),
 
         // Recruiter Controllers
         'recruiterDashboard' => new RecruiterDashboardController($twig, $db),
         'recruiterJobOffer' => new RecruiterJobOfferController($jobOfferService, $categoryService, $tagService, $twig),
-        // 'recruiterApplications' => new RecruiterApplicationController($applicationService, $twig),
+        'recruiterApplications' => new RecruiterApplicationController($applicationService, $twig),
 
         // Candidate Controllers
         'candidateProfile' => new ProfileController($userService, $twig),
         // 'candidateJobs' => new CandidateJobController($jobOfferService, $twig),
-        // 'candidateApplications' => new CandidateApplicationController($applicationService, $twig),
+        // 'candidateApplications' => new ApplicationController($applicationService, $twig),
 
         // Auth Controller
         // 'auth' => new AuthController($userService, $twig),
