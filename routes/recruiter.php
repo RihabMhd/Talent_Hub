@@ -53,7 +53,7 @@ return function (Router $router, $controllers, $middlewares) {
         // ===================================
         // APPLICATIONS MANAGEMENT
         // ===================================
-        
+
         // View all applications for recruiter's job offers
         $router->get('/applications', function () use ($controllers) {
             $controllers['recruiterApplications']->index();
@@ -87,13 +87,13 @@ return function (Router $router, $controllers, $middlewares) {
         // ===================================
         // COMPANY PROFILE
         // ===================================
-        
-        $router->get('/company', function () {
-            echo "Recruiter - Company Profile";
+
+        $router->get('/company', function () use ($controllers) {
+            $controllers['recruiterProfile']->show();
         });
 
-        $router->post('/company', function () {
-            echo "Recruiter - Update Company";
+        $router->post('/company', function () use ($controllers) {
+            $controllers['recruiterProfile']->update();
         });
     });
 };

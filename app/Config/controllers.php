@@ -35,6 +35,7 @@ return function($twig, $db) {
     $jobOfferRepository = new JobOfferRepository($db);
     $verificationService = new UserVerificationService($userRepository);
     $applicationRepository=new ApplicationRepository($db);
+    $companyRepository = new \App\Repository\CompanyRepository($db);
 
     // Initialize Services
     $categoryService = new CategoryService($categoryRepository);
@@ -58,13 +59,10 @@ return function($twig, $db) {
         'recruiterDashboard' => new RecruiterDashboardController($twig, $db),
         'recruiterJobOffer' => new RecruiterJobOfferController($jobOfferService, $categoryService, $tagService, $twig),
         'recruiterApplications' => new RecruiterApplicationController($applicationService, $twig),
-
+        'recruiterProfile' => new \App\Controllers\Recruiter\ProfileController($companyRepository, $twig),
         // Candidate Controllers
         'candidateProfile' => new ProfileController($userService, $twig),
-        // 'candidateJobs' => new CandidateJobController($jobOfferService, $twig),
         // 'candidateApplications' => new ApplicationController($applicationService, $twig),
 
-        // Auth Controller
-        // 'auth' => new AuthController($userService, $twig),
     ];
 };
