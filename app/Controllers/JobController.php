@@ -2,14 +2,17 @@
 namespace App\Controllers;
 
 use App\Repository\JobOfferRepository;
+use App\Repository\ApplicationRepository; // 1. Import the Application Repository
 use App\Config\Twig;
 
 class JobController {
     
     private $jobRepo;
+    private $appRepo; // 2. Add property for Application Repository
 
     public function __construct() {
         $this->jobRepo = new JobOfferRepository();
+        $this->appRepo = new ApplicationRepository(); // 3. Initialize it
     }
 
     public function show($id) {
@@ -37,23 +40,40 @@ class JobController {
 
         $tags = $this->jobRepo->getTagsByOfferId($id);
 
+        // 4. [NEW] Check if user has already applied
+        // We only check if a user is logged in AND is a candidate (role_id = 3)
+        $hasApplied = false;
+        if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 3) {
+            $hasApplied = $this->appRepo->hasApplied($_SESSION['user']['id'], $id);
+        }
+
         echo Twig::render('jobs/show.twig', [
             'offer' => $offer,
             'tags' => $tags,
             'session' => $_SESSION,
-            'flash' => $flash, // <--- Pass the grabbed messages here
+            'flash' => $flash, 
+            'has_applied' => $hasApplied, // 5. Pass the result to Twig
             'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
         ]);
     }
+
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // 1. Fetch all active jobs (Ensure you added findAllActive() to your Repository)
-        $jobs = $this->jobRepo->findAllActive();
+        // Check for search query
+        $keyword = $_GET['q'] ?? null;
 
-        // 2. Render the grid view
+        if ($keyword) {
+            // If searching, use the search method
+            $jobs = $this->jobRepo->searchActive($keyword);
+        } else {
+            // Otherwise, get all active jobs
+            $jobs = $this->jobRepo->findAllActive();
+        }
+
         echo Twig::render('jobs/index.twig', [
             'jobs' => $jobs,
+            'search_query' => $keyword, // Pass this so we can keep the text in the box
             'session' => $_SESSION,
             'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
         ]);

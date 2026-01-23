@@ -3,34 +3,53 @@ namespace App\Controllers\Candidate;
 use App\Repository\ApplicationRepository; // 1. Import this
 
 use App\Repository\CandidateRepository;
+use App\Repository\JobOfferRepository;
 use App\Config\Twig;
 
 class ProfileController {
     
     private $candidateRepo;
     private $appRepo;
+    private $jobRepo;
 
     public function __construct() {
         $this->candidateRepo = new CandidateRepository();
         $this->appRepo = new ApplicationRepository();
+        $this->jobRepo = new JobOfferRepository();
     }
 
     public function dashboard() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+        $this->checkCandidate();
         $userId = $_SESSION['user']['id'];
 
-        // 1. Get Stats
+        // Get Stats & Recent Applications (Existing code)
         $stats = $this->appRepo->getCandidateStats($userId);
-
-        // 2. Get Recent Applications
         $recentApps = $this->appRepo->getRecentApplications($userId);
 
-        // 3. Render View
-        echo \App\Config\Twig::render('candidate/dashboard.twig', [
-            'stats' => $stats,
-            'recentApps' => $recentApps,
+        // --- NEW RECOMMENDATION LOGIC ---
+        $recommendedJobs = [];
+        
+        // 1. Get Candidate Profile to access skills
+        $profile = $this->candidateRepo->findByUserId($userId);
+        
+        if (!empty($profile['skills'])) {
+            // 2. Convert "HTML, CSS, JS" string into array ['HTML', 'CSS', 'JS']
+            $skillsArray = explode(',', $profile['skills']);
+            
+            // 3. Trim whitespace from each skill
+            $skillsArray = array_map('trim', $skillsArray);
+            
+            // 4. Fetch matching jobs
+            $recommendedJobs = $this->jobRepo->findRecommended($skillsArray);
+        }
+        // --------------------------------
+
+        echo Twig::render('candidate/dashboard.twig', [
             'session' => $_SESSION,
             'current_user' => $_SESSION['user'],
+            'stats' => $stats,
+            'recentApps' => $recentApps,
+            'recommendedJobs' => $recommendedJobs, // <--- Pass to View
             'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
         ]);
     }
