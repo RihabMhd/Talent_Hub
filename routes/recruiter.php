@@ -50,10 +50,6 @@ return function (Router $router, $controllers, $middlewares) {
             $controllers['recruiterJobOffer']->delete($id);
         });
 
-        // ===================================
-        // APPLICATIONS MANAGEMENT
-        // ===================================
-
         // View all applications for recruiter's job offers
         $router->get('/applications', function () use ($controllers) {
             $controllers['recruiterApplications']->index();
@@ -74,19 +70,15 @@ return function (Router $router, $controllers, $middlewares) {
             $controllers['recruiterApplications']->viewCandidate($id);
         });
 
-        // Accept a candidate's application (POST)
+        // Accept a candidate's application 
         $router->post('/applications/accepter/{id}', function ($id) use ($controllers) {
             $controllers['recruiterApplications']->accept($id);
         });
 
-        // Reject a candidate's application (POST)
+        // Reject a candidate's application 
         $router->post('/applications/refuser/{id}', function ($id) use ($controllers) {
             $controllers['recruiterApplications']->reject($id);
         });
-
-        // ===================================
-        // COMPANY PROFILE
-        // ===================================
 
         $router->get('/company', function () use ($controllers) {
             $controllers['recruiterProfile']->show();
