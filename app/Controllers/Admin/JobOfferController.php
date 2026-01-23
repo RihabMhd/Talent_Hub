@@ -18,8 +18,13 @@ class JobOfferController
     {
         $this->checkAdmin();
 
+        // n checkew ila 3ndna filter f url (all, active, archived...)
         $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
+        
+        // njibou offers 7sb filter
         $offers = $this->jobOfferRepository->findAllForAdmin($filter);
+        
+        // stats - ch7al offre 3nd kola recruiter
         $stats  = $this->jobOfferRepository->countOffersPerRecruiter();
 
         echo Twig::render('admin/jobs/index.html.twig', [
@@ -34,8 +39,7 @@ class JobOfferController
         unset($_SESSION['success'], $_SESSION['error']);
     }
 
-    // --- Actions ---
-
+    // archiver offre - soft delete (ma kanmsho7och permanently)
     public function archive($id)
     {
         $this->checkAdmin();
@@ -47,6 +51,7 @@ class JobOfferController
         exit();
     }
 
+    // restaurer offre mn archive
     public function restore($id)
     {
         $this->checkAdmin();
@@ -58,6 +63,7 @@ class JobOfferController
         exit();
     }
 
+    // afficher form dial modification
     public function edit($id)
     {
         $this->checkAdmin();
@@ -65,13 +71,13 @@ class JobOfferController
         $offer = $this->jobOfferRepository->findById($id);
         $categories = $this->jobOfferRepository->getAllCategories();
 
+        // ila ma l9inach offre nrja3 l liste
         if (!$offer) {
             $_SESSION['error'] = 'Job offer not found';
             header('Location: /admin/jobs');
             exit();
         }
 
-        // [FIX] Updated path to match your file structure: admin/jobs/edit.twig
         echo Twig::render('admin/jobs/edit.twig', [ 
             'offer' => $offer,
             'categories' => $categories,
@@ -81,11 +87,13 @@ class JobOfferController
         unset($_SESSION['success'], $_SESSION['error']);
     }
 
+    // sauvegarder modifications dial offre
     public function update($id)
     {
         $this->checkAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // n jm3ou data mn form
             $data = [
                 'title' => $_POST['title'],
                 'description' => $_POST['description'],
@@ -101,13 +109,14 @@ class JobOfferController
                 exit();
             } else {
                 $_SESSION['error'] = 'Failed to update job offer';
-                // If update fails, reload the edit page to show error (optional)
+                // ila fachel update nrja3 l edit page bach user ichof error
                 header("Location: /admin/jobs/$id/edit"); 
                 exit();
             }
         }
     }
 
+    // supprimer permanently - hada hard delete
     public function destroy($id)
     {
         $this->checkAdmin();
@@ -119,8 +128,7 @@ class JobOfferController
         exit();
     }
 
-    // --- Security Helper ---
-
+    // protection - verification ila user howa admin
     private function checkAdmin()
     {
         if (session_status() === PHP_SESSION_NONE) {

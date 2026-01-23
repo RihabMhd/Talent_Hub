@@ -12,23 +12,25 @@ class Twig
     public static function getInstance(): Environment
     {
         if (self::$twig === null) {
+            // n loadew views mn dossier Views/
             $loader = new FilesystemLoader(__DIR__ . '/../Views');
             
+            // n configurew twig environment
             self::$twig = new Environment($loader, [
-                'cache' => false, // Set to __DIR__ . '/../../cache' in production
+                'cache' => false, 
                 'debug' => true,
                 'auto_reload' => true
             ]);
 
-            // Add global variables
+            // nzidou session k global variable bach nst3mloh f templates
             self::$twig->addGlobal('session', $_SESSION);
             
-            // Add url() function
+            // function url() bach ngenerrew urls f templates
             self::$twig->addFunction(new TwigFunction('url', function ($path) {
-                // Remove any leading slash and add it back for consistency
+                // n cleanew path w nrja3ouh consistent
                 $path = '/' . ltrim($path, '/');
                 
-                // Get base path if needed (adjust based on your setup)
+                // n checkew ila khassna base path (local dev setup)
                 $basePath = '';
                 if (strpos($_SERVER['REQUEST_URI'], '/Talent_Hub/public') !== false) {
                     $basePath = '/Talent_Hub/public';
@@ -37,7 +39,7 @@ class Twig
                 return $basePath . $path;
             }));
             
-            // Add asset() function for CSS/JS files
+            // function asset() dial css/js/images files
             self::$twig->addFunction(new TwigFunction('asset', function ($path) {
                 $basePath = '';
                 if (strpos($_SERVER['REQUEST_URI'], '/Talent_Hub/public') !== false) {
@@ -53,6 +55,7 @@ class Twig
 
     public static function render(string $template, array $data = []): void
     {
+        // n renderew template w n echo resultat
         echo self::getInstance()->render($template, $data);
     }
 }
