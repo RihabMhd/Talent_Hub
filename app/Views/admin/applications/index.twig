@@ -1,175 +1,389 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Applications | TalentHub</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
-</head>
+	<head>
+		<meta charset="UTF-8">
+		<title>Applications | TalentHub</title>
+		<meta
+		name="viewport" content="width=device-width, initial-scale=1">
 
-<body class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
+		 <script src="https://cdn.tailwindcss.com"></script>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    {# Sidebar #}
-    {% include 'admin/sidebar.html.twig' %}
+		<style>
+			body {
+				font-family: 'Inter', sans-serif;
+			}
+			::-webkit-scrollbar {
+				width: 6px;
+			}
+			::-webkit-scrollbar-track {
+				background: transparent;
+			}
+			::-webkit-scrollbar-thumb {
+				background: #cbd5e1;
+				border-radius: 3px;
+			}
+			::-webkit-scrollbar-thumb:hover {
+				background: #94a3b8;
+			}
 
-    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50">
-        
-        <header class="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 shadow-sm z-10">
-            <div>
-                <h1 class="text-xl font-bold text-slate-800 tracking-tight">Applications Management</h1>
-                <p class="text-xs text-slate-400 mt-0.5">Review and manage candidate applications</p>
-            </div>
-            <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
-                {{ session.user.name|slice(0,1)|upper }}
-            </div>
-        </header>
+			/* Modal animations */
+			@keyframes fadeIn {
+				from {
+					opacity: 0;
+				}
+				to {
+					opacity: 1;
+				}
+			}
+			@keyframes slideUp {
+				from {
+					opacity: 0;
+					transform: translateY(20px) scale(0.95);
+				}
+				to {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
+			}
+			.modal-backdrop {
+				animation: fadeIn 0.2s ease-out;
+			}
+			.modal-content {
+				animation: slideUp 0.3s ease-out;
+			}
+		</style>
+	</head>
 
-        <div class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+	<body
+		class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="md:col-span-4">
-                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Application Status Overview</h3>
-                </div>
-                
-                {% for stat in stats %}
-                <div class="bg-white p-5 rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex items-center justify-between hover:scale-[1.01] transition-transform">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
-                            {% if stat.status == 'en_attente' %}Pending
-                            {% elseif stat.status == 'acceptee' %}Accepted
-                            {% elseif stat.status == 'refusee' %}Rejected
-                            {% else %}{{ stat.status }}{% endif %}
-                        </p>
-                        <p class="text-2xl font-bold text-slate-800 mt-1">{{ stat.count }}</p>
-                    </div>
-                    
-                    <div class="p-3 rounded-xl 
-                        {% if stat.status == 'en_attente' %}bg-amber-50 text-amber-500
-                        {% elseif stat.status == 'acceptee' %}bg-emerald-50 text-emerald-500
-                        {% elseif stat.status == 'refusee' %}bg-red-50 text-red-500
-                        {% else %}bg-indigo-50 text-indigo-500{% endif %}">
-                        
-                        {% if stat.status == 'en_attente' %}
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {% elseif stat.status == 'acceptee' %}
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {% elseif stat.status == 'refusee' %}
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        {% else %}
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                        {% endif %}
-                    </div>
-                </div>
-                {% else %}
-                <div class="col-span-4 p-6 bg-white rounded-3xl border border-slate-100 text-center text-slate-400 italic">
-                    No applications found yet.
-                </div>
-                {% endfor %}
-            </div>
+		{# Sidebar #}
+		{% include 'admin/sidebar.html.twig' %}
 
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                     <h3 class="text-lg font-bold text-slate-800">Global Applications List</h3>
-                     <span class="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">All Candidates</span>
-                </div>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs text-slate-400 uppercase bg-slate-50/50 font-semibold tracking-wider">
-                            <tr>
-                                <th class="px-8 py-4 pl-10">Candidate</th>
-                                <th class="px-8 py-4">Job / Company</th>
-                                <th class="px-8 py-4">Applied Date</th>
-                                <th class="px-8 py-4">Status</th>
-                                <th class="px-8 py-4 text-right pr-10">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            {% for app in applications %}
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="px-8 py-4 pl-10">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs shadow-sm">
-                                            {{ app.candidate_nom|slice(0,1)|upper }}{{ app.candidate_prenom|slice(0,1)|upper }}
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-slate-900 flex items-center gap-2">
-                                                {{ app.candidate_nom }} {{ app.candidate_prenom }}
-                                                
-                                                {# Check if user is BANNED (is_active == 0) #}
-                                                {% if app.user_status == 0 %}
-                                                    <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 uppercase tracking-wide border border-red-200">Banned</span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="text-xs text-slate-400">{{ app.candidate_email }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                
-                                <td class="px-8 py-4">
-                                    <div class="font-semibold text-slate-800">{{ app.job_title }}</div>
-                                    <div class="text-xs text-slate-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                        {{ app.company_name }}
-                                    </div>
-                                </td>
-                                
-                                <td class="px-8 py-4 text-slate-500 font-medium">
-                                    {{ app.created_at|date('M d, Y') }}
-                                </td>
-                                
-                                <td class="px-8 py-4">
-                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border
-                                        {% if app.status == 'acceptee' %}bg-emerald-50 text-emerald-600 border-emerald-100
-                                        {% elseif app.status == 'refusee' %}bg-red-50 text-red-600 border-red-100
-                                        {% else %}bg-amber-50 text-amber-600 border-amber-100{% endif %}">
-                                        <span class="w-1.5 h-1.5 rounded-full 
-                                            {% if app.status == 'acceptee' %}bg-emerald-500
-                                            {% elseif app.status == 'refusee' %}bg-red-500
-                                            {% else %}bg-amber-500{% endif %}">
-                                        </span>
-                                        {% if app.status == 'en_attente' %}Pending
-                                        {% elseif app.status == 'acceptee' %}Accepted
-                                        {% elseif app.status == 'refusee' %}Rejected
-                                        {% else %}{{ app.status|capitalize }}{% endif %}
-                                    </span>
-                                </td>
-                                
-                                <td class="px-8 py-4 pr-10 text-right">
-                                    {# Logic: 0 = Banned, 1 = Active #}
-                                    {% if app.user_status == 0 %}
-                                        <a href="/admin/applications/unblock/{{ app.candidate_id }}" 
-                                           class="text-emerald-600 hover:text-emerald-800 font-medium text-xs bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 border border-emerald-200">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                            Unblock
-                                        </a>
-                                    {% else %}
-                                        <a href="/admin/applications/block/{{ app.candidate_id }}" 
-                                           onclick="return confirm('Are you sure you want to block this candidate? They will be logged out properly.');"
-                                           class="text-red-600 hover:text-red-800 font-medium text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 border border-red-200">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                            Block
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+		<main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50">
 
-        </div>
-    </main>
-</body>
+			<header class="h-20 bg-white border-b border-slate-100 flex items-center justify-between px-8 shadow-sm z-10">
+				<div>
+					<h1 class="text-xl font-bold text-slate-800 tracking-tight">Applications Management</h1>
+					<p class="text-xs text-slate-400 mt-0.5">Review and manage candidate applications</p>
+				</div>
+				<div class="h-10 w-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border-2 border-white shadow-md flex items-center justify-center text-white font-bold text-sm">
+					{{ session.user.name|slice(0,1)|upper }}
+				</div>
+			</header>
+
+			<div
+				class="flex-1 overflow-x-hidden overflow-y-auto p-8">
+
+				{# Stats Section #}
+				<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+					<div class="md:col-span-4">
+						<h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Application Status Overview</h3>
+					</div>
+
+					{% if stats is defined and stats is not empty %}
+						{% for stat in stats %}
+							<div class="bg-white p-5 rounded-3xl shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-slate-100 flex items-center justify-between hover:scale-[1.01] transition-transform">
+								<div>
+									<p class="text-xs font-medium text-slate-400 uppercase tracking-wide">
+										{% if stat.status == 'en_attente' %}Pending
+											{% elseif stat.status == 'acceptee' %}Accepted
+											{% elseif stat.status == 'refusee' %}Rejected
+										{% else %}
+											{{ stat.status }}
+										{% endif %}
+									</p>
+									<p class="text-2xl font-bold text-slate-800 mt-1">{{ stat.count }}</p>
+								</div>
+
+								<div class="p-3 rounded-xl
+																																								                            {% if stat.status == 'en_attente' %}bg-amber-50 text-amber-500
+																																								                            {% elseif stat.status == 'acceptee' %}bg-emerald-50 text-emerald-500
+																																								                            {% elseif stat.status == 'refusee' %}bg-red-50 text-red-500
+																																								                            {% else %}bg-indigo-50 text-indigo-500{% endif %}">
+
+									{% if stat.status == 'en_attente' %}
+										<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+										</svg>
+									{% elseif stat.status == 'acceptee' %}
+										<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+										</svg>
+									{% elseif stat.status == 'refusee' %}
+										<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+										</svg>
+									{% else %}
+										<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+										</svg>
+									{% endif %}
+								</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<div class="col-span-4 p-6 bg-white rounded-3xl border border-slate-100 text-center text-slate-400 italic">
+							No application statistics available yet.
+						</div>
+					{% endif %}
+				</div>
+
+				{# Applications Table #}
+				<div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+					<div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+						<h3 class="text-lg font-bold text-slate-800">Global Applications List</h3>
+						<span class="text-xs font-medium text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100">
+							{% if applications is defined and applications|length > 0 %}
+								{{ applications|length }}
+								Candidates
+							{% else %}
+								0 Candidates
+							{% endif %}
+						</span>
+					</div>
+
+					<div class="overflow-x-auto">
+						{% if applications is defined and applications is not empty %}
+							<table class="w-full text-sm text-left text-slate-600">
+								<thead class="text-xs text-slate-400 uppercase bg-slate-50/50 font-semibold tracking-wider">
+									<tr>
+										<th class="px-8 py-4 pl-10">Candidate</th>
+										<th class="px-8 py-4">Job / Company</th>
+										<th class="px-8 py-4">Applied Date</th>
+										<th class="px-8 py-4">Status</th>
+										<th class="px-8 py-4 text-right pr-10">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="divide-y divide-slate-100">
+									{% for app in applications %}
+										<tr class="hover:bg-slate-50/80 transition-colors">
+											<td class="px-8 py-4 pl-10">
+												<div class="flex items-center gap-4">
+													<div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500 text-xs shadow-sm">
+														{{ app.candidate_nom|slice(0,1)|upper }}{{ app.candidate_prenom|slice(0,1)|upper }}
+													</div>
+													<div>
+														<div class="font-bold text-slate-900 flex items-center gap-2">
+															{{ app.candidate_nom }}
+															{{ app.candidate_prenom }}
+
+															{# Check if user is BANNED (is_active == 0) #}
+															{% if app.user_status == 0 %}
+																<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 uppercase tracking-wide border border-red-200">Banned</span>
+															{% endif %}
+														</div>
+														<div class="text-xs text-slate-400">{{ app.candidate_email }}</div>
+													</div>
+												</div>
+											</td>
+
+											<td class="px-8 py-4">
+												<div class="font-semibold text-slate-800">{{ app.job_title }}</div>
+												<div class="text-xs text-slate-400 flex items-center gap-1">
+													<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+													</svg>
+													{{ app.company_name }}
+												</div>
+											</td>
+
+											<td class="px-8 py-4 text-slate-500 font-medium">
+												{{ app.created_at|date('M d, Y') }}
+											</td>
+
+											<td class="px-8 py-4">
+												<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border
+																																																								                                        {% if app.status == 'acceptee' %}bg-emerald-50 text-emerald-600 border-emerald-100
+																																																								                                        {% elseif app.status == 'refusee' %}bg-red-50 text-red-600 border-red-100
+																																																								                                        {% else %}bg-amber-50 text-amber-600 border-amber-100{% endif %}">
+													<span class="w-1.5 h-1.5 rounded-full
+																																																								                                            {% if app.status == 'acceptee' %}bg-emerald-500
+																																																								                                            {% elseif app.status == 'refusee' %}bg-red-500
+																																																								                                            {% else %}bg-amber-500{% endif %}"></span>
+													{% if app.status == 'en_attente' %}Pending
+														{% elseif app.status == 'acceptee' %}Accepted
+														{% elseif app.status == 'refusee' %}Rejected
+													{% else %}
+														{{ app.status|capitalize }}
+													{% endif %}
+												</span>
+											</td>
+
+											<td class="px-8 py-4 pr-10 text-right">
+												{% if app.user_status == 0 %}
+													<button onclick="showUnblockModal('{{ app.candidate_id }}', '{{ app.candidate_nom }} {{ app.candidate_prenom }}')" class="text-emerald-600 hover:text-emerald-800 font-medium text-xs bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1 border border-emerald-200">
+
+														<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+														</svg>
+														Unblock
+													</button>
+
+												{% else %}
+													<button onclick="showBlockModal('{{ app.candidate_id }}', '{{ app.candidate_nom }} {{ app.candidate_prenom }}')" class="text-red-600 hover:text-red-800 font-medium text-xs bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 border border-red-200">
+														<svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+														</svg>
+														Block
+													</button>
+												{% endif %}
+											</td>
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						{% else %}
+							{# Empty state when no applications #}
+							<div class="p-12 text-center">
+								<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+									<svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+									</svg>
+								</div>
+								<h3 class="text-lg font-semibold text-slate-700 mb-2">No Applications Yet</h3>
+								<p class="text-sm text-slate-500 max-w-sm mx-auto">
+									There are no job applications to display at the moment. Applications will appear here once candidates start applying.
+								</p>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+
+			</div>
+		</main>
+
+		{# Block Confirmation Modal #}
+		<div id="blockModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
+			<div
+				class="flex items-center justify-center min-h-screen px-4">
+				{# Backdrop #}
+				<div class="modal-backdrop fixed inset-0 transition-opacity bg-slate-900 bg-opacity-50 backdrop-blur-sm" onclick="closeBlockModal()"></div>
+
+				{# Modal Content #}
+				<div class="modal-content inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+					<div class="bg-white px-6 pt-6 pb-4">
+						<div class="sm:flex sm:items-start">
+							<div class="mx-auto flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-full bg-red-100 sm:mx-0 sm:h-12 sm:w-12">
+								<svg class="h-7 w-7 text-red-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+								</svg>
+							</div>
+							<div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+								<h3 class="text-xl font-bold text-slate-900 mb-2">
+									Block Candidate
+								</h3>
+								<div class="mt-2">
+									<p class="text-sm text-slate-600">
+										Are you sure you want to block
+										<strong id="candidateName" class="text-slate-900"></strong>?
+									</p>
+									<p class="text-sm text-slate-500 mt-2">
+										They will be logged out and won't be able to access their account until unblocked.
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="bg-slate-50 px-6 py-4 flex flex-row-reverse gap-3">
+						<a id="confirmBlockBtn" href="#" class="inline-flex justify-center items-center px-5 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all shadow-sm">
+							Yes, Block Candidate
+						</a>
+						<button type="button" onclick="closeBlockModal()" class="inline-flex justify-center px-5 py-2.5 border border-slate-200 text-sm font-semibold rounded-lg text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+							Cancel
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		{# Unblock Confirmation Modal #}
+		<div id="unblockModal" class="hidden fixed inset-0 z-50">
+			<div
+				class="flex items-center justify-center min-h-screen px-4">
+
+				{# Backdrop #}
+				<div class="fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm" onclick="closeUnblockModal()"></div>
+
+				{# Modal Content #}
+				<div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg modal-content">
+					<div class="px-6 pt-6 pb-4">
+						<div class="flex items-start gap-4">
+							<div class="flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100">
+								<svg class="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+								</svg>
+							</div>
+
+							<div class="flex-1">
+								<h3 class="text-xl font-bold text-slate-900 mb-2">
+									Unblock Candidate
+								</h3>
+								<p class="text-sm text-slate-600">
+									Are you sure you want to unblock
+									<strong id="unblockCandidateName" class="text-slate-900"></strong>?
+								</p>
+								<p class="text-sm text-slate-500 mt-2">
+									They will regain access to their account immediately.
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="bg-slate-50 px-6 py-4 flex flex-row-reverse gap-3 rounded-b-2xl">
+						<a id="confirmUnblockBtn" href="#" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition">
+							Yes, Unblock
+						</a>
+
+						<button onclick="closeUnblockModal()" class="px-5 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 bg-white hover:bg-slate-50">
+							Cancel
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		 <script>
+			function showUnblockModal(candidateId, candidateName) {
+				const modal = document.getElementById('unblockModal');
+				document.getElementById('unblockCandidateName').textContent = candidateName;
+				document.getElementById('confirmUnblockBtn').href =
+				            '/admin/applications/unblock/' + candidateId;
+				
+				modal.classList.remove('hidden');
+				document.body.style.overflow = 'hidden';
+			}
+			
+			function closeUnblockModal() {
+				document.getElementById('unblockModal').classList.add('hidden');
+				document.body.style.overflow = 'auto';
+			}
+			function showBlockModal(candidateId, candidateName) {
+				const modal = document.getElementById('blockModal');
+				const nameElement = document.getElementById('candidateName');
+				const confirmBtn = document.getElementById('confirmBlockBtn');
+								            
+				nameElement.textContent = candidateName;
+								            confirmBtn.href = '/admin/applications/block/' + candidateId;
+								            
+								            modal.classList.remove('hidden');
+								            document.body.style.overflow = 'hidden';
+								        }
+								
+								        function closeBlockModal() {
+								            const modal = document.getElementById('blockModal');
+								            modal.classList.add('hidden');
+								            document.body.style.overflow = 'auto';
+								        }
+								
+								        // Close modal on ESC key
+								        document.addEventListener('keydown', function(e) {
+								            if (e.key === 'Escape') {
+								                closeBlockModal();
+								            }
+								        });
+		</script>
+
+	</body>
 </html>

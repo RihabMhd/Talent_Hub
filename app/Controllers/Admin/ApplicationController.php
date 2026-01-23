@@ -15,9 +15,27 @@ class ApplicationController {
     public function index() {
         $this->checkAdmin();
 
-        
+        // Get applications with details
         $applications = $this->applicationRepository->findAllWithDetails();
+        
+        // Get stats - ensure proper data structure
         $stats = $this->applicationRepository->getStatusStats();
+        
+        // Debug: Log both stats and applications to see what's being returned
+        error_log("=== DEBUG INFO ===");
+        error_log("Stats count: " . count($stats));
+        error_log("Stats data: " . print_r($stats, true));
+        error_log("Applications count: " . count($applications));
+        error_log("Applications sample: " . print_r(array_slice($applications, 0, 2), true));
+        error_log("==================");
+        
+        // Ensure both are arrays even if empty
+        if (!is_array($stats)) {
+            $stats = [];
+        }
+        if (!is_array($applications)) {
+            $applications = [];
+        }
 
         echo Twig::render('admin/applications/index.twig', [
             'applications' => $applications,
