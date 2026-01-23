@@ -20,31 +20,40 @@ class ApplicationRepository
      */
     public function findAllWithDetails()
     {
-        $sql = "SELECT app.id, 
-                       app.status, 
-                       app.date_postulation as created_at,
-                       app.message_motivation,
-                       app.cv_path,
-                       -- Candidate Info
-                       u.id as candidate_id,
-                       u.nom AS candidate_nom, 
-                       u.prenom AS candidate_prenom, 
-                       u.email AS candidate_email,
-                       u.is_active AS user_status,
-                       -- Job Info
-                       o.id as job_id,
-                       o.titre AS job_title,
-                       o.salaire as job_salaire,
-                       o.lieu as job_lieu,
-                       -- Company Info
-                       c.nom_entreprise AS company_name
-                FROM candidatures app
-                JOIN users u ON app.user_id = u.id
-                JOIN offres o ON app.offre_id = o.id
-                JOIN companies c ON o.company_id = c.id
-                ORDER BY app.date_postulation DESC";
+        try {
+            $query = "
+                SELECT 
+                    c.id,
+                    c.status,
+                    c.date_postulation as created_at,
+                    c.message_motivation,
+                    c.cv_path,
+                    u.nom as candidate_nom,
+                    u.prenom as candidate_prenom,
+                    u.email as candidate_email,
+                    u.is_active as user_status,
+                    u.id as candidate_id,
+                    o.titre as job_title,
+                    comp.nom_entreprise as company_name
+                FROM candidatures c
+                INNER JOIN users u ON c.user_id = u.id
+                INNER JOIN offres o ON c.offre_id = o.id
+                INNER JOIN companies comp ON o.company_id = comp.id
+                ORDER BY c.date_postulation DESC
+            ";
 
-        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            error_log("Applications found: " . count($results));
+
+            return $results;
+        } catch (\PDOException $e) {
+            error_log("Error fetching applications: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -68,7 +77,7 @@ class ApplicationRepository
                 INNER JOIN companies co ON o.company_id = co.id
                 WHERE co.user_id = :recruiter_id
                 ORDER BY app.date_postulation DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['recruiter_id' => $recruiterId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -97,7 +106,7 @@ class ApplicationRepository
                 INNER JOIN companies co ON o.company_id = co.id
                 INNER JOIN categories cat ON o.category_id = cat.id
                 WHERE app.id = :application_id";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['application_id' => $applicationId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -127,7 +136,7 @@ class ApplicationRepository
                 INNER JOIN categories cat ON o.category_id = cat.id
                 WHERE app.id = :application_id 
                 AND co.user_id = :recruiter_id";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'application_id' => $applicationId,
@@ -147,7 +156,7 @@ class ApplicationRepository
                 INNER JOIN companies co ON o.company_id = co.id
                 WHERE app.id = :application_id 
                 AND co.user_id = :recruiter_id";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'application_id' => $applicationId,
@@ -179,7 +188,7 @@ class ApplicationRepository
                 WHERE co.user_id = :recruiter_id
                 AND app.status = :status
                 ORDER BY app.date_postulation DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'recruiter_id' => $recruiterId,
@@ -215,7 +224,7 @@ class ApplicationRepository
                     OR o.titre LIKE :search
                 )
                 ORDER BY app.date_postulation DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'recruiter_id' => $recruiterId,
@@ -238,7 +247,7 @@ class ApplicationRepository
                 INNER JOIN offres o ON app.offre_id = o.id
                 INNER JOIN companies co ON o.company_id = co.id
                 WHERE co.user_id = :recruiter_id";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['recruiter_id' => $recruiterId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -249,16 +258,34 @@ class ApplicationRepository
      */
     public function getStatusStats()
     {
-        $sql = "SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN status = 'en_attente' THEN 1 ELSE 0 END) as en_attente,
-                SUM(CASE WHEN status = 'acceptee' THEN 1 ELSE 0 END) as acceptee,
-                SUM(CASE WHEN status = 'refusee' THEN 1 ELSE 0 END) as refusee
-                FROM candidatures";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $query = "
+                SELECT 
+                    status, 
+                    COUNT(*) as count 
+                FROM candidatures 
+                GROUP BY status 
+                ORDER BY 
+                    CASE status
+                        WHEN 'en_attente' THEN 1
+                        WHEN 'acceptee' THEN 2
+                        WHEN 'refusee' THEN 3
+                        ELSE 4
+                    END
+            ";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            $results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            error_log("Stats Query Results: " . print_r($results, true));
+
+            return $results;
+        } catch (\PDOException $e) {
+            error_log("Error fetching stats: " . $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -269,7 +296,7 @@ class ApplicationRepository
         $sql = "UPDATE candidatures 
                 SET status = :status 
                 WHERE id = :application_id";
-        
+
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             'status' => $status,
@@ -296,26 +323,52 @@ class ApplicationRepository
     /**
      * Delete a candidature
      */
-   
+
 
     /**
      * Block a Candidate (Set is_active = 0)
      */
     public function blockUser($userId)
     {
-        $sql = "UPDATE users SET is_active = 0 WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute(['id' => $userId]);
+        try {
+            $query = "UPDATE users SET is_active = 0 WHERE id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':user_id', $userId, \PDO::PARAM_INT);
+
+            $result = $stmt->execute();
+
+            if ($result) {
+                error_log("User $userId blocked successfully");
+            }
+
+            return $result;
+        } catch (\PDOException $e) {
+            error_log("Error blocking user: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
-     * Unblock a Candidate (Set is_active = 1)
+     * Unblock a user (set is_active to 1)
      */
     public function unblockUser($userId)
     {
-        $sql = "UPDATE users SET is_active = 1 WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute(['id' => $userId]);
+        try {
+            $query = "UPDATE users SET is_active = 1 WHERE id = :user_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(':user_id', $userId, \PDO::PARAM_INT);
+
+            $result = $stmt->execute();
+
+            if ($result) {
+                error_log("User $userId unblocked successfully");
+            }
+
+            return $result;
+        } catch (\PDOException $e) {
+            error_log("Error unblocking user: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -335,7 +388,7 @@ class ApplicationRepository
                 INNER JOIN categories cat ON o.category_id = cat.id
                 WHERE app.user_id = :user_id
                 ORDER BY app.date_postulation DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['user_id' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -377,7 +430,7 @@ class ApplicationRepository
                 INNER JOIN companies co ON o.company_id = co.id
                 ORDER BY app.date_postulation DESC
                 LIMIT :limit";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
@@ -398,18 +451,19 @@ class ApplicationRepository
                 INNER JOIN users u ON app.user_id = u.id
                 WHERE app.offre_id = :offre_id
                 ORDER BY app.date_postulation DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['offre_id' => $offreId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public function deleteCandidature(int $id): bool
-{
-    $stmt = $this->db->prepare("DELETE FROM candidatures WHERE id = :id");
-    $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
-    return $stmt->execute();
-}
-public function hasApplied($userId, $offerId) {
+    {
+        $stmt = $this->db->prepare("DELETE FROM candidatures WHERE id = :id");
+        $stmt->bindParam(':id', $id, \PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+    public function hasApplied($userId, $offerId)
+    {
         $sql = "SELECT COUNT(*) FROM candidatures WHERE user_id = :uid AND offre_id = :oid";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
@@ -417,7 +471,8 @@ public function hasApplied($userId, $offerId) {
     }
 
     // Save the new application
-    public function create($userId, $offerId) {
+    public function create($userId, $offerId)
+    {
         $sql = "INSERT INTO candidatures (user_id, offre_id,cv_path,status, date_postulation) 
                 VALUES (:uid, :oid,'your cv', 'en_attente', NOW())";
         $stmt = $this->db->prepare($sql);
@@ -427,7 +482,8 @@ public function hasApplied($userId, $offerId) {
     // ... inside ApplicationRepository class ...
 
     // Get statistics for the dashboard cards
-    public function getCandidateStats($userId) {
+    public function getCandidateStats($userId)
+    {
         $sql = "SELECT 
                     COUNT(*) as total,
                     SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
@@ -435,26 +491,25 @@ public function hasApplied($userId, $offerId) {
                     SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
                 FROM candidatures 
                 WHERE user_id = :uid";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['uid' => $userId]);
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     // Get the 5 most recent applications
-    public function getRecentApplications($userId) {
+    public function getRecentApplications($userId)
+    {
         $sql = "SELECT c.*, o.titre as job_title, comp.nom_entreprise, o.lieu, o.salaire
                 FROM candidatures c
                 JOIN offres o ON c.offre_id = o.id
                 JOIN companies comp ON o.company_id = comp.id
                 WHERE c.user_id = :uid
-                -- [FIX] Changed 'created_at' to 'date_postulation'
                 ORDER BY c.date_postulation DESC
                 LIMIT 5";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['uid' => $userId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
-    
 }
