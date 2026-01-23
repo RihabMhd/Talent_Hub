@@ -171,7 +171,6 @@
         </div>
     </main>
 
-    <!-- Verify Modal -->
     <div id="verifyModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all">
             <div class="p-6 border-b border-slate-100">
@@ -195,7 +194,6 @@
         </div>
     </div>
 
-    <!-- Reject Modal -->
     <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 transform transition-all">
             <div class="p-6 border-b border-slate-100">
@@ -220,7 +218,6 @@
     </div>
 
     <script>
-        // Verify Modal Functions
         function openVerifyModal(id, name) {
             document.getElementById('verifyUserName').textContent = name;
             document.getElementById('verifyForm').action = '/admin/users/verify/' + id;
@@ -231,7 +228,6 @@
             document.getElementById('verifyModal').classList.add('hidden');
         }
 
-        // Reject Modal Functions
         function openRejectModal(id, name) {
             document.getElementById('rejectUserName').textContent = name;
             document.getElementById('rejectForm').action = '/admin/users/reject/' + id;
@@ -242,7 +238,6 @@
             document.getElementById('rejectModal').classList.add('hidden');
         }
 
-        // Close modals on ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeVerifyModal();
