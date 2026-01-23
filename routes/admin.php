@@ -22,8 +22,20 @@ return function (Router $router, $controllers, $middlewares) {
             $controllers['user']->index();
         });
         
+        $router->get('/users/pending', function() use ($controllers) {
+            $controllers['adminUser']->pending();
+        });
+        
         $router->get('/users/create', function() use ($controllers) {
             $controllers['user']->create();
+        });
+
+        $router->post('/users/verify/{id}', function($id) use ($controllers) {
+            $controllers['adminUser']->verify($id);
+        });
+        
+        $router->post('/users/reject/{id}', function($id) use ($controllers) {
+            $controllers['adminUser']->reject($id);
         });
         
         $router->post('/users', function() use ($controllers) {
@@ -114,12 +126,10 @@ return function (Router $router, $controllers, $middlewares) {
         });
         
         // --- Applications Management ---
-        // [FIX] Changed 'application' to 'applications' (plural) to match index.php
         $router->get('/applications', function() use ($controllers) {
             $controllers['adminApplications']->index();
         });
         
-        // [FIX] Updated to use blockCandidate/unblockCandidate methods
         $router->get('/applications/block/{id}', function($id) use ($controllers) {
             $controllers['adminApplications']->blockCandidate($id);
         });
