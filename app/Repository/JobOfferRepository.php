@@ -183,4 +183,49 @@ class JobOfferRepository
     return $this->db->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
 
     }
+    public function searchActive($keyword) {
+        $sql = "SELECT o.*, 
+                       c.nom_entreprise, 
+                       cat.nom as category_name 
+                FROM offres o
+                LEFT JOIN companies c ON o.company_id = c.id
+                LEFT JOIN categories cat ON o.category_id = cat.id
+                WHERE o.status = 'active' 
+                AND (
+                    o.titre LIKE :keyword 
+                    OR o.description LIKE :keyword 
+                    OR c.nom_entreprise LIKE :keyword
+                )
+                ORDER BY o.created_at DESC";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['keyword' => '%' . $keyword . '%']);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    public function findRecommended(array $skills) {
+        if (empty($skills)) {
+            return [];
+        }
+
+        // Create placeholders for the SQL IN clause (?, ?, ?)
+        $placeholders = implode(',', array_fill(0, count($skills), '?'));
+
+        $sql = "SELECT DISTINCT o.*, 
+                       c.nom_entreprise, 
+                       cat.nom as category_name 
+                FROM offres o
+                JOIN companies c ON o.company_id = c.id
+                LEFT JOIN categories cat ON o.category_id = cat.id
+                JOIN offre_tag ot ON o.id = ot.offre_id
+                JOIN tags t ON ot.tag_id = t.id
+                WHERE o.status = 'active'
+                AND t.nom IN ($placeholders)
+                ORDER BY o.created_at DESC
+                LIMIT 6";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($skills);
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }   

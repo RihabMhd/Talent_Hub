@@ -29,6 +29,13 @@ return function(Router $router, $controllers, $middlewares) {
         $router->post('/profile/update', function() use ($controllers) {
             $controllers['candidateProfile']->update();
         });
+
+        // [NEW] View My Applications List
+        $router->get('/applications', function() use ($controllers) {
+            $controllers['candidateApplication']->index();
+        });
+
+        // Apply for a Job
         $router->post('/applications/apply/{id}', function($id) use ($controllers) {
             $controllers['candidateApplication']->apply($id);
         });

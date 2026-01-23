@@ -2,6 +2,7 @@
 namespace App\Controllers\Candidate;
 
 use App\Repository\ApplicationRepository;
+use App\Config\Twig; // Ensure Twig is imported for the new method
 
 class ApplicationController {
     
@@ -9,6 +10,29 @@ class ApplicationController {
 
     public function __construct() {
         $this->appRepo = new ApplicationRepository();
+    }
+
+    // [NEW] View My Applications Page
+    public function index() {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        // 1. Security Check
+        if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 3) {
+            header('Location: /login');
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+
+        // 2. Fetch all applications for this user
+        $applications = $this->appRepo->findByUserId($userId);
+
+        // 3. Render the View
+        echo Twig::render('candidate/applications.twig', [
+            'applications' => $applications,
+            'session' => $_SESSION,
+            'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
+        ]);
     }
 
     public function apply($id) {
