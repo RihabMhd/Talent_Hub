@@ -15,21 +15,27 @@ class ProfileController
         $this->twig = $twig;
     }
 
+    // afficher profile dial company
     public function show()
     {
         $userId = $_SESSION['user']['id'];
+        
+        // njibou info dial company li t3l9 b recruiter had
         $company = $this->companyRepository->findByRecruiterId($userId);
 
         echo $this->twig->render('recruiter/profile.twig', [
             'company' => $company,
             'session' => $_SESSION
         ]);
+        
         unset($_SESSION['success']);
         unset($_SESSION['error']);
     }
 
+    // modifier company profile
     public function update()
     {
+        // n jm3ou data mn form
         $data = [
             'nom_entreprise' => $_POST['nom_entreprise'],
             'adresse_entreprise' => $_POST['adresse_entreprise'],
@@ -37,6 +43,8 @@ class ProfileController
             'user_id' => $_SESSION['user']['id']
         ];
 
+        // updateOrQuery - ila company makanch, ghadi y créeha
+        // ila kan, ghadi y updatiha
         if ($this->companyRepository->updateOrQuery($data)) {
             $_SESSION['success'] = "Company profile updated successfully!";
         }

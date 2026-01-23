@@ -17,6 +17,7 @@ class AuthController
         $this->validator = $validator;
     }
 
+    // redirect l dashboard 7sb role dial user
     public function dashboard(): void
     {
         if (!$this->authService->isLoggedIn()) {
@@ -35,8 +36,10 @@ class AuthController
         $this->redirectToDashboard($user['role_id']);
     }
 
+    // afficher form dial login
     public function showLoginForm(): void
     {
+        // ila deja connecté nrja3oh l dashboard
         if ($this->authService->isLoggedIn()) {
             $this->redirect('/dashboard');
             return;
@@ -48,6 +51,7 @@ class AuthController
         ]);
     }
 
+    // traitement dial login
     public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -58,12 +62,14 @@ class AuthController
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
+        // validation - khass email w password
         if (empty($email) || empty($password)) {
             $_SESSION['error'] = 'Email and password are required';
             $this->redirect('/login');
             return;
         }
 
+        // n checkew credentials f database
         $user = $this->authService->login($email, $password);
 
         if ($user) {
@@ -75,6 +81,7 @@ class AuthController
         }
     }
 
+    // afficher form dial inscription
     public function showRegisterForm(): void
     {
         if ($this->authService->isLoggedIn()) {
@@ -85,10 +92,11 @@ class AuthController
         Twig::render('auth/register.twig', [
             'error' => $this->getFlash('error'),
             'errors' => $this->getFlash('errors'),
-            'old' => $this->getFlash('old') ?? []
+            'old' => $this->getFlash('old') ?? []  
         ]);
     }
 
+    // traitement dial inscription
     public function register(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -101,10 +109,12 @@ class AuthController
             'prenom' => $_POST['prenom'] ?? '',
             'email' => $_POST['email'] ?? '',
             'password' => $_POST['password'] ?? '',
-            'role_id' => $_POST['role_id'] ?? 3
+            'role_id' => $_POST['role_id'] ?? 3  
         ];
 
         $passwordConfirm = $_POST['password_confirm'] ?? '';
+        
+        // n checkew ila passwords matchاw
         if ($userData['password'] !== $passwordConfirm) {
             $_SESSION['error'] = 'Passwords do not match';
             $_SESSION['old'] = $userData;
@@ -112,7 +122,7 @@ class AuthController
             return;
         }
 
-        // Basic validation
+        // validation basic dial fields
         $errors = [];
         if (empty($userData['nom'])) $errors['nom'] = 'Last name is required';
         if (empty($userData['prenom'])) $errors['prenom'] = 'First name is required';
@@ -129,26 +139,30 @@ class AuthController
             return;
         }
 
+        // n créew user f database
         $userId = $this->authService->register($userData);
 
         if ($userId) {
             $_SESSION['success'] = 'Registration successful, please login';
             $this->redirect('/login');
         } else {
+            // imken email deja exist
             $_SESSION['error'] = 'Registration failed, email may already exist';
             $_SESSION['old'] = $userData;
             $this->redirect('/register');
         }
     }
 
+    // logout - n7aydou session
     public function logout(): void
     {
         $this->authService->logout();
-        session_start(); // Restart session for flash message
+        session_start(); 
         $_SESSION['success'] = 'Logged out successfully';
         $this->redirect('/login');
     }
 
+    // afficher form dial tbdil password
     public function showChangePasswordForm(): void
     {
         if (!$this->authService->isLoggedIn()) {
@@ -163,6 +177,7 @@ class AuthController
         ]);
     }
 
+    // traitement dial tbdil password
     public function changePassword(): void
     {
         if (!$this->authService->isLoggedIn()) {
@@ -191,6 +206,7 @@ class AuthController
             return;
         }
 
+        // n checkew ila password jdid strong bzaf
         $validation = $this->validator->validatePasswordStrength($newPassword);
         if ($validation['strength'] === 'weak') {
             $_SESSION['error'] = 'Password is too weak: ' . implode(', ', $validation['feedback']);
@@ -200,6 +216,7 @@ class AuthController
 
         $user = $this->authService->getCurrentUser();
 
+        // nbdlo password - kanverifiw old password awalan
         $success = $this->authService->changePassword($user['id'], $oldPassword, $newPassword);
 
         if ($success) {
@@ -211,16 +228,17 @@ class AuthController
         }
     }
 
+    // redirect 7sb role - kol role 3ndo dashboard dyalo
     private function redirectToDashboard(int $roleId): void
     {
         switch ($roleId) {
-            case 1:
+            case 1:  // admin
                 $this->redirect('/admin/dashboard');
                 break;
-            case 2:
+            case 2:  // recruiter
                 $this->redirect('/recruiter/dashboard');
                 break;
-            case 3:
+            case 3:  // candidate
                 $this->redirect('/candidate/dashboard');
                 break;
             default:
@@ -235,6 +253,7 @@ class AuthController
         exit;
     }
 
+    // njibou flash message w n7aydoh mn session
     private function getFlash(string $key): mixed
     {
         if (isset($_SESSION[$key])) {

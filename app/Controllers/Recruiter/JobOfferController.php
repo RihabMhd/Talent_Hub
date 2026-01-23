@@ -28,16 +28,16 @@ class JobOfferController
         $filter = $_GET['filter'] ?? 'all';
 
         try {
-            // Get recruiter's job offers based on filter
+            // njibou job offers dial recruiter 7sb filter (all, active, archived)
             $offers = $this->getRecruiterOffers($userId, $filter);
             
-            // Get companies for the modals (if needed)
+            // companies dyalo 
             $companies = $this->getRecruiterCompanies($userId);
             
-            // Get categories for the modals
+            // categories bach y9der ychof w ya3ti category l kol offer
             $categories = $this->categoryService->getAllCategories();
             
-            // Get statistics
+            // stats - ch7al offer 3nd kol company
             $stats = $this->getCompanyStats($userId);
 
             echo $this->twig->render('recruiter/jobs/index.html.twig', [
@@ -66,11 +66,13 @@ class JobOfferController
         }
     }
 
+    // njibou offers dial recruiter - b join m3a companies w categories
     private function getRecruiterOffers($userId, $filter)
     {
         try {
             $db = $this->getDbConnection();
             
+            // query complexe - kayjib offers m3a company name w category
             $sql = "
                 SELECT 
                     o.id,
@@ -93,7 +95,7 @@ class JobOfferController
                 WHERE c.user_id = :user_id
             ";
 
-            // Apply filter
+            // n appliqiw filter 7sb choice dial user
             if ($filter === 'active') {
                 $sql .= " AND o.deleted_at IS NULL AND o.status = 'active'";
             } elseif ($filter === 'archived') {
@@ -112,6 +114,7 @@ class JobOfferController
         }
     }
 
+    // njibou companies dial recruiter
     private function getRecruiterCompanies($userId)
     {
         try {
@@ -131,6 +134,7 @@ class JobOfferController
         }
     }
 
+    // stats - ch7al offer 3nd kol company
     private function getCompanyStats($userId)
     {
         try {
@@ -157,6 +161,7 @@ class JobOfferController
         }
     }
 
+    // archiver offer - soft delete (ma kanmsho7ohch permanently)
     public function archive($id)
     {
         $userId = $_SESSION['user']['id'] ?? 0;
@@ -164,13 +169,14 @@ class JobOfferController
         try {
             $db = $this->getDbConnection();
             
-            // Verify ownership
+            // n checkew ownership - ma y9derch yarchiver offer dial recruiter akhor
             if (!$this->verifyOfferOwnership($id, $userId)) {
                 $_SESSION['error'] = 'Unauthorized action';
                 header('Location: /recruiter/jobs');
                 exit;
             }
 
+            // n sauvgardiw date f deleted_at - hada soft delete
             $stmt = $db->prepare("
                 UPDATE offres 
                 SET deleted_at = NOW() 
@@ -188,6 +194,7 @@ class JobOfferController
         exit;
     }
 
+    // restaurer offer mn archive
     public function restore($id)
     {
         $userId = $_SESSION['user']['id'] ?? 0;
@@ -195,13 +202,13 @@ class JobOfferController
         try {
             $db = $this->getDbConnection();
             
-            // Verify ownership
             if (!$this->verifyOfferOwnership($id, $userId)) {
                 $_SESSION['error'] = 'Unauthorized action';
                 header('Location: /recruiter/jobs');
                 exit;
             }
 
+            // nrja3ou deleted_at l NULL
             $stmt = $db->prepare("
                 UPDATE offres 
                 SET deleted_at = NULL 
@@ -219,6 +226,7 @@ class JobOfferController
         exit;
     }
 
+    // créer offer jdid
     public function store()
     {
         $userId = $_SESSION['user']['id'] ?? 0;
@@ -226,7 +234,7 @@ class JobOfferController
         try {
             $db = $this->getDbConnection();
             
-            // Verify company ownership
+            // n checkew ila company t3lq b recruiter had
             $companyId = $_POST['company_id'] ?? null;
             if (!$this->verifyCompanyOwnership($companyId, $userId)) {
                 $_SESSION['error'] = 'Unauthorized action';
@@ -259,6 +267,7 @@ class JobOfferController
         exit;
     }
 
+    // modifier offer
     public function update($id)
     {
         $userId = $_SESSION['user']['id'] ?? 0;
@@ -266,7 +275,6 @@ class JobOfferController
         try {
             $db = $this->getDbConnection();
             
-            // Verify ownership
             if (!$this->verifyOfferOwnership($id, $userId)) {
                 $_SESSION['error'] = 'Unauthorized action';
                 header('Location: /recruiter/jobs');
@@ -304,6 +312,7 @@ class JobOfferController
         exit;
     }
 
+    // supprimer permanently - hard delete, ma y9derch yrj3ha
     public function delete($id)
     {
         $userId = $_SESSION['user']['id'] ?? 0;
@@ -311,7 +320,6 @@ class JobOfferController
         try {
             $db = $this->getDbConnection();
             
-            // Verify ownership
             if (!$this->verifyOfferOwnership($id, $userId)) {
                 $_SESSION['error'] = 'Unauthorized action';
                 header('Location: /recruiter/jobs');
@@ -331,11 +339,13 @@ class JobOfferController
         exit;
     }
 
+    // verification - ila offer t3lq b recruiter had
     private function verifyOfferOwnership($offerId, $userId)
     {
         try {
             $db = $this->getDbConnection();
             
+            // n joiniw m3a companies bach nchoufou ownership
             $stmt = $db->prepare("
                 SELECT COUNT(*) as count
                 FROM offres o
@@ -355,6 +365,7 @@ class JobOfferController
         }
     }
 
+    // verification company ownership
     private function verifyCompanyOwnership($companyId, $userId)
     {
         try {
@@ -378,6 +389,7 @@ class JobOfferController
         }
     }
 
+    // njibou db connection - kan checkew f service wla n créewha
     private function getDbConnection()
     {
         if (method_exists($this->jobOfferService, 'getDb')) {
