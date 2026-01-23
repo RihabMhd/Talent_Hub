@@ -11,11 +11,6 @@ class ApplicationService {
         $this->applicationRepository = new ApplicationRepository();
     }
 
-    /**
-     * Get all applications with full details
-     * 
-     * @return array List of all applications with candidate, job, and company info
-     */
     public function getAllApplications(): array {
         try {
             return $this->applicationRepository->findAllWithDetails();
@@ -25,11 +20,7 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Get applications grouped by status
-     * 
-     * @return array Applications organized by status (en_attente, acceptee, refusee)
-     */
+    
     public function getApplicationsByStatus(): array {
         $applications = $this->getAllApplications();
         
@@ -49,12 +40,7 @@ class ApplicationService {
         return $grouped;
     }
 
-    /**
-     * Accept an application
-     * 
-     * @param int $applicationId
-     * @return bool Success status
-     */
+    
     public function acceptApplication(int $applicationId): bool {
         try {
             $result = $this->applicationRepository->acceptCandidature($applicationId);
@@ -70,19 +56,12 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Reject an application
-     * 
-     * @param int $applicationId
-     * @return bool Success status
-     */
+   
     public function rejectApplication(int $applicationId): bool {
         try {
             $result = $this->applicationRepository->rejectCandidature($applicationId);
             
             if ($result) {
-                // You could add email notification here
-                // $this->sendRejectionEmail($applicationId);
                 return true;
             }
             
@@ -93,12 +72,6 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Block a candidate (prevent them from applying)
-     * 
-     * @param int $userId Candidate's user ID
-     * @return bool Success status
-     */
     public function blockCandidate(int $userId): bool {
         try {
             return $this->applicationRepository->blockUser($userId);
@@ -108,12 +81,7 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Unblock a candidate
-     * 
-     * @param int $userId Candidate's user ID
-     * @return bool Success status
-     */
+    
     public function unblockCandidate(int $userId): bool {
         try {
             return $this->applicationRepository->unblockUser($userId);
@@ -123,11 +91,7 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Get application statistics
-     * 
-     * @return array Statistics including counts by status and total
-     */
+    
     public function getStatistics(): array {
         try {
             $statusStats = $this->applicationRepository->getStatusStats();
@@ -151,7 +115,6 @@ class ApplicationService {
                 }
             }
 
-            // Calculate acceptance rate
             if ($stats['total'] > 0) {
                 $stats['acceptance_rate'] = round(
                     ($stats['acceptee'] / $stats['total']) * 100, 
@@ -172,12 +135,7 @@ class ApplicationService {
         }
     }
 
-    /**
-     * Get applications for a specific candidate
-     * 
-     * @param int $userId Candidate's user ID
-     * @return array List of applications for the candidate
-     */
+   
     public function getApplicationsByCandidate(int $userId): array {
         $allApplications = $this->getAllApplications();
         
@@ -186,12 +144,7 @@ class ApplicationService {
         });
     }
 
-    /**
-     * Check if a candidate is blocked
-     * 
-     * @param int $userId Candidate's user ID
-     * @return bool True if blocked, false otherwise
-     */
+   
     public function isCandidateBlocked(int $userId): bool {
         $applications = $this->getApplicationsByCandidate($userId);
         
@@ -203,12 +156,7 @@ class ApplicationService {
         return false;
     }
 
-    /**
-     * Validate application data before processing
-     * 
-     * @param int $applicationId
-     * @return array ['valid' => bool, 'message' => string]
-     */
+    
     public function validateApplication(int $applicationId): array {
         $applications = $this->getAllApplications();
         
@@ -248,12 +196,7 @@ class ApplicationService {
         ];
     }
 
-    /**
-     * Bulk accept applications
-     * 
-     * @param array $applicationIds Array of application IDs
-     * @return array ['success' => int, 'failed' => int]
-     */
+   
     public function bulkAcceptApplications(array $applicationIds): array {
         $success = 0;
         $failed = 0;
@@ -272,12 +215,7 @@ class ApplicationService {
         ];
     }
 
-    /**
-     * Bulk reject applications
-     * 
-     * @param array $applicationIds Array of application IDs
-     * @return array ['success' => int, 'failed' => int]
-     */
+ 
     public function bulkRejectApplications(array $applicationIds): array {
         $success = 0;
         $failed = 0;

@@ -14,9 +14,7 @@ class CandidateRepository
         $this->db = (new Database())->getConnection();
     }
 
-    /**
-     * Get candidate profile by User ID (including tags)
-     */
+   
     public function findByUserId($userId)
     {
         $sql = "SELECT c.*, u.nom, u.prenom, u.email 
@@ -30,18 +28,12 @@ class CandidateRepository
         return $profile ?: null;
     }
 
-    /**
-     * Update or Create Profile
-     */
-    /**
-     * Update or Create Profile
-     */
+    
     public function updateProfile($userId, $data, $tags = [])
     {
         try {
             $this->db->beginTransaction();
 
-            // Update name in Users table
             $stmtUser = $this->db->prepare("UPDATE users SET nom = :nom, prenom = :prenom WHERE id = :id");
             $stmtUser->execute([
                 'nom' => $data['nom'],
@@ -49,7 +41,6 @@ class CandidateRepository
                 'id' => $userId
             ]);
 
-            // Check if candidate exists
             $stmtCheck = $this->db->prepare("SELECT id FROM candidates WHERE user_id = :uid");
             $stmtCheck->execute(['uid' => $userId]);
             $exists = $stmtCheck->fetch();
@@ -73,9 +64,7 @@ class CandidateRepository
                 if (isset($data['cv_path'])) $params['cv_path'] = $data['cv_path'];
 
                 $this->db->prepare($sql)->execute($params);
-            } else {
-                // Logic for INSERT if user doesn't have a profile yet...
-            }
+            } 
 
             $this->db->commit();
             return true;

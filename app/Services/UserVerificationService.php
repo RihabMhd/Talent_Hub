@@ -12,9 +12,7 @@ class UserVerificationService
         $this->userRepository = $userRepository;
     }
     
-    /**
-     * Get all users pending verification
-     */
+
     public function getPendingUsers(): array
     {
         $users = $this->userRepository->findPendingVerification();
@@ -25,9 +23,7 @@ class UserVerificationService
         }, $users);
     }
     
-    /**
-     * Get all verified users
-     */
+   
     public function getVerifiedUsers(): array
     {
         $users = $this->userRepository->findVerified();
@@ -38,12 +34,9 @@ class UserVerificationService
         }, $users);
     }
     
-    /**
-     * Verify a user by ID
-     */
+   
     public function verifyUser(int $userId): array
     {
-        // Check if user exists
         $user = $this->userRepository->findById($userId);
         
         if (!$user) {
@@ -53,7 +46,6 @@ class UserVerificationService
             ];
         }
         
-        // Check if already verified
         if ($user['is_verified']) {
             return [
                 'success' => false,
@@ -61,7 +53,6 @@ class UserVerificationService
             ];
         }
         
-        // Verify the user
         $result = $this->userRepository->verifyUser($userId);
         
         if ($result) {
@@ -77,12 +68,9 @@ class UserVerificationService
         ];
     }
     
-    /**
-     * Reject a user by ID
-     */
+  
     public function rejectUser(int $userId): array
     {
-        // Check if user exists
         $user = $this->userRepository->findById($userId);
         
         if (!$user) {
@@ -92,7 +80,6 @@ class UserVerificationService
             ];
         }
         
-        // Check if already verified
         if ($user['is_verified']) {
             return [
                 'success' => false,
@@ -100,7 +87,6 @@ class UserVerificationService
             ];
         }
         
-        // Reject (delete) the user
         $result = $this->userRepository->rejectUser($userId);
         
         if ($result) {
@@ -116,9 +102,7 @@ class UserVerificationService
         ];
     }
     
-    /**
-     * Get pending users count
-     */
+   
     public function getPendingCount(): int
     {
         return count($this->userRepository->findPendingVerification());
