@@ -32,5 +32,6 @@ return function(Router $router, $controllers, $middlewares) {
         $router->post('/applications/apply/{id}', function($id) use ($controllers) {
             $controllers['candidateApplication']->apply($id);
         });
+        
     });
 };
