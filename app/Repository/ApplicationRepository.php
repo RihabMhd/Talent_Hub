@@ -423,4 +423,38 @@ public function hasApplied($userId, $offerId) {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
     }
+    // ######################
+    // ... inside ApplicationRepository class ...
+
+    // Get statistics for the dashboard cards
+    public function getCandidateStats($userId) {
+        $sql = "SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) as accepted,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+                FROM candidatures 
+                WHERE user_id = :uid";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    // Get the 5 most recent applications
+    public function getRecentApplications($userId) {
+        $sql = "SELECT c.*, o.titre as job_title, comp.nom_entreprise, o.lieu, o.salaire
+                FROM candidatures c
+                JOIN offres o ON c.offre_id = o.id
+                JOIN companies comp ON o.company_id = comp.id
+                WHERE c.user_id = :uid
+                -- [FIX] Changed 'created_at' to 'date_postulation'
+                ORDER BY c.date_postulation DESC
+                LIMIT 5";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['uid' => $userId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    
 }

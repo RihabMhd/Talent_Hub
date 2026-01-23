@@ -1,5 +1,6 @@
 <?php
 namespace App\Controllers\Candidate;
+use App\Repository\ApplicationRepository; // 1. Import this
 
 use App\Repository\CandidateRepository;
 use App\Config\Twig;
@@ -7,14 +8,31 @@ use App\Config\Twig;
 class ProfileController {
     
     private $candidateRepo;
+    private $appRepo;
 
     public function __construct() {
         $this->candidateRepo = new CandidateRepository();
+        $this->appRepo = new ApplicationRepository();
     }
 
     public function dashboard() {
-        $this->checkCandidate();
-        echo Twig::render('candidate/dashboard.twig', ['session' => $_SESSION, 'current_user' => $_SESSION['user']]);
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $userId = $_SESSION['user']['id'];
+
+        // 1. Get Stats
+        $stats = $this->appRepo->getCandidateStats($userId);
+
+        // 2. Get Recent Applications
+        $recentApps = $this->appRepo->getRecentApplications($userId);
+
+        // 3. Render View
+        echo \App\Config\Twig::render('candidate/dashboard.twig', [
+            'stats' => $stats,
+            'recentApps' => $recentApps,
+            'session' => $_SESSION,
+            'current_user' => $_SESSION['user'],
+            'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
+        ]);
     }
 
     // [NEW] View Profile (Read Only)
