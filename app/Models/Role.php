@@ -39,7 +39,8 @@ class Role
         return $data;
     }
     
-
+    // ----- GETTERS -----
+     // ----- SETTERS -----
     public function getId(): ?int
     {
         return $this->id;

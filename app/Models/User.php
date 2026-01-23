@@ -88,7 +88,8 @@ class User
         return $data;
     }
 
-    // Getters and Setters
+    // ----- GETTERS -----
+     // ----- SETTERS -----
     public function getId(): ?int
     {
         return $this->id;

@@ -28,6 +28,7 @@ class Category
         ];
     }
 
+    // ----- GETTERS -----
     public function getId(): ?int
     {
         return $this->id;
