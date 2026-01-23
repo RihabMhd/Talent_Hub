@@ -16,15 +16,15 @@ class StatisticsController {
     public function index() {
         $this->checkAdmin();
 
-        // 1. Fetch Stats for Graphs
+        // njm3ou stats mn database bach naffichewhom f graphs
         $stats = [
-            'users_count' => $this->countUsersByRole(),
-            'jobs_by_category' => $this->countJobsByCategory(),
-            'applications_status' => $this->countApplicationsByStatus(),
-            'top_companies' => $this->getTopCompanies()
+            'users_count' => $this->countUsersByRole(),           
+            'jobs_by_category' => $this->countJobsByCategory(),  
+            'applications_status' => $this->countApplicationsByStatus(), 
+            'top_companies' => $this->getTopCompanies()           
         ];
 
-        // 2. Render View
+        // nrenderiw view dial statistics
         echo Twig::render('admin/statistics/index.html.twig', [
             'stats' => $stats,
             'session' => $_SESSION,
@@ -32,27 +32,28 @@ class StatisticsController {
         ]);
     }
 
-    // --- Export to CSV ---
+    // exporter stats l csv file - s7al bach admin ysauvi data
     public function export() {
         $this->checkAdmin();
         
         $filename = "talenthub_stats_" . date('Y-m-d') . ".csv";
         
+        // n configurew headers dial download
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         
         $output = fopen('php://output', 'w');
         
-        // Add Header
+        // n ktbou header dial csv
         fputcsv($output, ['Statistic', 'Category/Name', 'Count']);
 
-        // Add Data: Jobs by Category
+        // nzidou data dial jobs by category
         $jobs = $this->countJobsByCategory();
         foreach($jobs as $job) {
             fputcsv($output, ['Job Category', $job['name'], $job['count']]);
         }
 
-        // Add Data: Users
+        // nzidou data dial users
         $users = $this->countUsersByRole();
         foreach($users as $user) {
             fputcsv($output, ['User Role', $user['name'], $user['count']]);
@@ -62,8 +63,7 @@ class StatisticsController {
         exit();
     }
 
-    // --- Helper Queries ---
-
+    // n7sbou users 7sb role dyalhom (admin, recruiter, candidate)
     private function countUsersByRole() {
         $sql = "SELECT r.name, COUNT(u.id) as count 
                 FROM users u 
@@ -72,7 +72,9 @@ class StatisticsController {
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // n7sbou job offers 7sb category
     private function countJobsByCategory() {
+        // kan checkew deleted_at bach ma n7sboch archived jobs
         $sql = "SELECT c.nom as name, COUNT(o.id) as count 
                 FROM offres o 
                 JOIN categories c ON o.category_id = c.id 
@@ -81,19 +83,14 @@ class StatisticsController {
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // status dial applications (pending, accepted, rejected)
     private function countApplicationsByStatus() {
-        // Assuming you have an 'applications' table
-        // If not, returns dummy data or create table first
-        // $sql = "SELECT status, COUNT(*) as count FROM applications GROUP BY status";
-        // return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-        
-        return [
-            ['status' => 'Pending', 'count' => 12],
-            ['status' => 'Accepted', 'count' => 5],
-            ['status' => 'Rejected', 'count' => 3]
-        ];
+        // hadi temporary data - ila 3ndk table applications badel b query
+        $sql = "SELECT status, COUNT(*) as count FROM candidatures GROUP BY status";
+        return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // top 5 companies li 3ndhom akthar offres
     private function getTopCompanies() {
         $sql = "SELECT c.nom_entreprise, COUNT(o.id) as count 
                 FROM companies c 

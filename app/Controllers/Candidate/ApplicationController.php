@@ -2,7 +2,7 @@
 namespace App\Controllers\Candidate;
 
 use App\Repository\ApplicationRepository;
-use App\Config\Twig; // Ensure Twig is imported for the new method
+use App\Config\Twig;
 
 class ApplicationController {
     
@@ -12,11 +12,11 @@ class ApplicationController {
         $this->appRepo = new ApplicationRepository();
     }
 
-    // [NEW] View My Applications Page
+    // afficher liste dial candidatures dyal candidate
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // 1. Security Check
+        // n checkew ila user howa candidate 
         if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 3) {
             header('Location: /login');
             exit;
@@ -24,10 +24,10 @@ class ApplicationController {
 
         $userId = $_SESSION['user']['id'];
 
-        // 2. Fetch all applications for this user
+        // njibou toutes les candidatures dial had user
         $applications = $this->appRepo->findByUserId($userId);
 
-        // 3. Render the View
+        // nrenderiw view
         echo Twig::render('candidate/applications.twig', [
             'applications' => $applications,
             'session' => $_SESSION,
@@ -35,10 +35,11 @@ class ApplicationController {
         ]);
     }
 
+    // postuler l job offer
     public function apply($id) {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // 1. Security Check: Must be logged in and be a candidate (role_id = 3)
+        // protection - khass ykon connecté w role candidate
         if (!isset($_SESSION['user']) || $_SESSION['user']['role_id'] != 3) {
             $_SESSION['error'] = "You must be logged in as a candidate to apply.";
             header('Location: /login');
@@ -47,21 +48,21 @@ class ApplicationController {
 
         $userId = $_SESSION['user']['id'];
 
-        // 2. Check for Duplicate Application
+        // n checkew ila deja postuléé l had offre - ma n9derch npostuli 2 fois
         if ($this->appRepo->hasApplied($userId, $id)) {
             $_SESSION['error'] = "You have already applied for this job.";
             header("Location: /jobs/$id");
             exit;
         }
 
-        // 3. Create Application
+        // n créew candidature f database
         if ($this->appRepo->create($userId, $id)) {
             $_SESSION['success'] = "Application submitted successfully! Good luck.";
         } else {
             $_SESSION['error'] = "Something went wrong. Please try again.";
         }
         
-        // 4. Redirect back to the job page
+        // nrja3 l page dial job offer
         header("Location: /jobs/$id");
         exit;
     }

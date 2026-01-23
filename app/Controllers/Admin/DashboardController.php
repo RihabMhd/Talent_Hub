@@ -15,6 +15,7 @@ class DashboardController
 
     public function index()
     {
+        // njibou stats dial dashboard - 3adad users w roles
         $totalUsers = $this->getTotalUsers();
         $totalRoles = $this->getTotalRoles();
         
@@ -29,6 +30,7 @@ class DashboardController
         unset($_SESSION['error']);
     }
 
+    // n7sbou 3adad users li f database
     private function getTotalUsers(): int
     {
         try {
@@ -36,10 +38,12 @@ class DashboardController
             $result = $stmt->fetch(\PDO::FETCH_ASSOC);
             return (int) $result['count'];
         } catch (\Exception $e) {
+            // ila kan chi error nrja3ou 0
             return 0;
         }
     }
 
+    // n7sbou 3dad roles (admin, recruiter, candidate...)
     private function getTotalRoles(): int
     {
         try {

@@ -14,17 +14,17 @@ class ApplicationController
         $this->applicationRepository = new ApplicationRepository();
     }
 
-    /**
-     * Display all applications for recruiter's job offers
-     */
+    // afficher toutes les candidatures dial job offers dyal recruiter
     public function index()
     {
         $this->checkRecruiter();
 
         $recruiterId = $_SESSION['user']['id'];
 
-        // Get all applications for this recruiter's job offers
+        // njibou candidatures kamlin li jiw 3la offers dyalo
         $applications = $this->applicationRepository->findByRecruiterId($recruiterId);
+        
+        // stats dial status - ch7al pending, accepté, refusé
         $stats = $this->applicationRepository->getStatusStatsByRecruiter($recruiterId);
 
         echo Twig::render('recruiter/applications/index.twig', [
@@ -35,9 +35,7 @@ class ApplicationController
         ]);
     }
 
-    /**
-     * View candidate profile and application details
-     */
+    // afficher détails dial candidature w profile candidate
     public function viewCandidate($applicationId)
     {
         $this->checkRecruiter();
@@ -49,6 +47,9 @@ class ApplicationController
         }
 
         $recruiterId = $_SESSION['user']['id'];
+        
+        // n checkew ila had application t3lq b jobs dial recruiter
+        // 7it ma y9derch ychof candidatures dial recruiter akhor
         $application = $this->applicationRepository->findByIdAndRecruiter($applicationId, $recruiterId);
 
         if (!$application) {
@@ -64,9 +65,7 @@ class ApplicationController
         ]);
     }
 
-    /**
-     * Accept a candidate's application
-     */
+    // accepter candidature
     public function accept($applicationId)
     {
         $this->checkRecruiter();
@@ -79,13 +78,14 @@ class ApplicationController
 
         $recruiterId = $_SESSION['user']['id'];
 
-        // Validate application belongs to recruiter
+        // double check ila application t3lq b recruiter had
         if (!$this->applicationRepository->belongsToRecruiter($applicationId, $recruiterId)) {
             $_SESSION['error'] = 'Unauthorized action';
             header('Location: /recruiter/applications');
             exit();
         }
 
+        // nbdlo status l acceptée
         $result = $this->applicationRepository->updateStatus($applicationId, 'acceptee');
 
         if ($result) {
@@ -98,9 +98,7 @@ class ApplicationController
         exit();
     }
 
-    /**
-     * Reject a candidate's application
-     */
+    // refuser candidature
     public function reject($applicationId)
     {
         $this->checkRecruiter();
@@ -113,7 +111,7 @@ class ApplicationController
 
         $recruiterId = $_SESSION['user']['id'];
 
-        // Validate application belongs to recruiter
+        // verification ownership
         if (!$this->applicationRepository->belongsToRecruiter($applicationId, $recruiterId)) {
             $_SESSION['error'] = 'Unauthorized action';
             header('Location: /recruiter/applications');
@@ -132,9 +130,7 @@ class ApplicationController
         exit();
     }
 
-    /**
-     * Filter applications by status
-     */
+    // filtrer candidatures 7sb status
     public function filterByStatus()
     {
         $this->checkRecruiter();
@@ -142,6 +138,7 @@ class ApplicationController
         $status = $_GET['status'] ?? 'all';
         $recruiterId = $_SESSION['user']['id'];
 
+        // ila status machi 'all', n filteriw
         if ($status !== 'all') {
             $applications = $this->applicationRepository->findByRecruiterAndStatus($recruiterId, $status);
         } else {
@@ -159,9 +156,7 @@ class ApplicationController
         ]);
     }
 
-    /**
-     * Search applications by candidate name or email
-     */
+    // search f candidatures - b name wla email dial candidate
     public function search()
     {
         $this->checkRecruiter();
@@ -181,9 +176,7 @@ class ApplicationController
         ]);
     }
 
-    /**
-     * Check if user is a recruiter
-     */
+    // protection - ghir recruiter (role_id = 2)
     private function checkRecruiter()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();

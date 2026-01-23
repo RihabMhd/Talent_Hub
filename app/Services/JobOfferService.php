@@ -29,13 +29,11 @@ class JobOfferService
 
     public function createJobOffer(array $data): ?int
     {
-        // Add validation here if needed
         return $this->jobOfferRepository->create($data);
     }
 
     public function updateJobOffer(int $id, array $data): bool
     {
-        // Add validation here if needed
         return $this->jobOfferRepository->update($id, $data);
     }
 

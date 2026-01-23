@@ -223,7 +223,6 @@
 			</div>
 		</main>
 
-		<!-- Archive Confirmation Modal -->
 		<div id="archiveModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
 			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full">
 				<div class="p-6">
@@ -250,7 +249,6 @@
 			</div>
 		</div>
 
-		<!-- Restore Confirmation Modal -->
 		<div id="restoreModal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50 p-4">
 			<div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full">
 				<div class="p-6">
@@ -278,7 +276,6 @@
 		</div>
 
 		<script>
-			// Archive Modal Functions
 			function openArchiveModal(id, title) {
 				document.getElementById('archiveJobTitle').textContent = title;
 				document.getElementById('archiveForm').action = '/admin/jobs/' + id + '/archive';
@@ -291,7 +288,6 @@
 				document.body.style.overflow = 'auto';
 			}
 
-			// Restore Modal Functions
 			function openRestoreModal(id, title) {
 				document.getElementById('restoreJobTitle').textContent = title;
 				document.getElementById('restoreForm').action = '/admin/jobs/' + id + '/restore';
@@ -304,7 +300,6 @@
 				document.body.style.overflow = 'auto';
 			}
 
-			// Close modals on ESC key
 			document.addEventListener('keydown', function(event) {
 				if (event.key === 'Escape') {
 					closeArchiveModal();
@@ -312,7 +307,6 @@
 				}
 			});
 
-			// Close modals when clicking outside
 			document.getElementById('archiveModal').addEventListener('click', function(e) {
 				if (e.target === this) {
 					closeArchiveModal();

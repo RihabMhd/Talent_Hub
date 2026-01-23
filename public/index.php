@@ -1,8 +1,6 @@
 <?php
-// start session
 session_start();
 
-// autoload dependencies
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use App\Config\Database;
@@ -15,12 +13,10 @@ use App\Controllers\JobController;
 use App\Controllers\Admin\JobOfferController;
 use App\Controllers\Admin\StatisticsController;
 use App\Controllers\Admin\ApplicationController;
-use App\Controllers\Candidate\ProfileController; // Import Candidate Controller
+use App\Controllers\Candidate\ProfileController; 
 use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 use App\Controllers\Candidate\ApplicationController as CandidateAppController;
-// ... other imports ...
-// use App\Controllers\Candidate\ApplicationController as CandidateAppController; // <--- ADD THIS
 
 
 // initialize database connection
@@ -39,15 +35,14 @@ $twig->addFunction(new \Twig\TwigFunction('url', function ($path) {
     return '/' . ltrim($path, '/');
 }));
 
-// initialize repositories
+// --- INITIALIZE REPOSITORIES ---
 $userRepository = new UserRepository($db);
 
-// initialize services
+// --- INITIALIZE SERVICES ---
 $validatorService = new ValidatorService();
 $authService = new AuthService($userRepository);
 
 // --- INITIALIZE CONTROLLERS ---
-// 1. Start with your manual definitions
 $controllers = [
     'auth' => new AuthController($authService, $validatorService),
     'jobOffer' => new JobOfferController(),
@@ -58,7 +53,6 @@ $controllers = [
     'candidateApplication' => new CandidateAppController()
 ];
 
-// 2. Load extra controllers from config (if any)
 if (file_exists(__DIR__ . '/../app/Config/controllers.php')) {
     $controllerLoader = require __DIR__ . '/../app/Config/controllers.php';
     $extraControllers = $controllerLoader($twig, $db);
@@ -74,7 +68,7 @@ $middlewares = [
     'candidate' => new RoleMiddleware(['candidate', 'candidat'])
 ];
 
-// create router instance
+
 $router = new Router();
 
 // load route files
@@ -95,7 +89,7 @@ foreach ($routeFiles as $file) {
     }
 }
 
-// Protected routes - Dashboard redirect
+// protected routes
 $router->get('/dashboard', function () use ($authService) {
     if (!$authService->isLoggedIn()) {
         header('Location: /login');

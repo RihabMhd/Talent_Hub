@@ -28,7 +28,8 @@ use App\Services\TagService;
 use App\Services\UserService;
 
 return function($twig, $db) {
-    // Initialize Repositories
+
+    // khassna n-initialisew les repositories dial db
     $categoryRepository = new CategoryRepository($db);
     $tagRepository = new TagRepository($db);
     $userRepository = new UserRepository($db);
@@ -37,7 +38,7 @@ return function($twig, $db) {
     $applicationRepository=new ApplicationRepository($db);
     $companyRepository = new \App\Repository\CompanyRepository($db);
 
-    // Initialize Services
+    // hna ghan7et les services li ghanst3mlo f les controllers
     $categoryService = new CategoryService($categoryRepository);
     $tagService = new TagService($tagRepository);
     $userService = new UserService($userRepository);
@@ -45,7 +46,7 @@ return function($twig, $db) {
     $applicationService = new ApplicationService($applicationRepository);
 
     return [
-        // Admin Controllers
+        // controllers dial admin section - ghandir biha lmanagement dial site
         'adminDashboard' => new AdminDashboardController($twig, $db),
         'category' => new CategoryController($categoryService, $twig),
         'tag' => new TagController($tagService, $twig),
@@ -55,14 +56,13 @@ return function($twig, $db) {
         'adminApplications' => new ApplicationController($applicationService, $twig),
         'adminStatistics' => new StatisticsController($twig, $db),
 
-        // Recruiter Controllers
+        // recruiter section - l companies li kaypostew les offres
         'recruiterDashboard' => new RecruiterDashboardController($twig, $db),
         'recruiterJobOffer' => new RecruiterJobOfferController($jobOfferService, $categoryService, $tagService, $twig),
         'recruiterApplications' => new RecruiterApplicationController($applicationService, $twig),
         'recruiterProfile' => new \App\Controllers\Recruiter\ProfileController($companyRepository, $twig),
-        // Candidate Controllers
+        
+        // candidate side - nas li kayqlbo 3la lkhdma
         'candidateProfile' => new ProfileController($userService, $twig),
-        // 'candidateApplications' => new ApplicationController($applicationService, $twig),
-
     ];
 };

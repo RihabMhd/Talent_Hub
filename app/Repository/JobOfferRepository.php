@@ -10,13 +10,10 @@ class JobOfferRepository
 
     public function __construct()
     {
-        // Initialize DB connection internally to match other repositories
         $this->db = (new Database())->getConnection();
     }
 
-    /**
-     * Used by Controller: index()
-     */
+   
     public function findAllForAdmin(string $filter = 'all'): array
     {
         $sql = "SELECT o.*, 
@@ -40,9 +37,7 @@ class JobOfferRepository
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Used by Controller: edit()
-     */
+    
     public function findById(int $id): ?array
     {
         $sql = "SELECT o.*, 
@@ -63,21 +58,16 @@ class JobOfferRepository
         return $result ?: null;
     }
 
-    /**
-     * Used by Controller: edit() to populate dropdowns
-     */
+   
     public function getAllCategories(): array
     {
         $sql = "SELECT * FROM categories ORDER BY nom ASC";
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Used by Controller: update()
-     */
+    
     public function update(int $id, array $data): bool
     {
-        // [FIX] Removed 'type_contrat' because it does not exist in your Schema
         $sql = "UPDATE offres 
                 SET titre = :titre, 
                     description = :description, 
@@ -89,19 +79,17 @@ class JobOfferRepository
         
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            'titre' => $data['title'],         // Matches Controller key
+            'titre' => $data['title'],         
             'description' => $data['description'],
             'category_id' => $data['category_id'],
-            'lieu' => $data['location'],       // Matches Controller key
-            'salaire' => $data['salary'],      // Matches Controller key
+            'lieu' => $data['location'],     
+            'salaire' => $data['salary'],     
             'status' => $data['status'],
             'id' => $id
         ]);
     }
 
-    /**
-     * Used by Controller: archive()
-     */
+
     public function softDelete(int $id): bool
     {
         $sql = "UPDATE offres SET deleted_at = NOW(), status = 'archived' WHERE id = :id";
@@ -109,9 +97,6 @@ class JobOfferRepository
         return $stmt->execute(['id' => $id]);
     }
 
-    /**
-     * Used by Controller: restore()
-     */
     public function restore(int $id): bool
     {
         $sql = "UPDATE offres SET deleted_at = NULL, status = 'active' WHERE id = :id";
@@ -126,9 +111,7 @@ class JobOfferRepository
         return $stmt->execute(['id' => $id]);
     }
 
-    /**
-     * Used by Controller: index() for KPI cards
-     */
+  
     public function countOffersPerRecruiter(): array
     {
         $sql = "SELECT comp.nom_entreprise, COUNT(o.id) as total_offres 
@@ -142,8 +125,6 @@ class JobOfferRepository
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
     public function findFullOffer($id) {
-        // [FIX] Use LEFT JOIN instead of JOIN
-        // This ensures the job loads even if the company or category is missing/deleted
         $sql = "SELECT o.*, 
                        c.nom_entreprise, c.adresse_entreprise, c.site_web, 
                        cat.nom as category_name
@@ -157,7 +138,6 @@ class JobOfferRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // Fetch tags for a specific offer
     public function getTagsByOfferId($id) {
         $sql = "SELECT t.* FROM tags t
                 JOIN offre_tag ot ON t.id = ot.tag_id
@@ -170,7 +150,6 @@ class JobOfferRepository
 
     
     public function findAllActive() {
-    // [FIX] Use LEFT JOIN so offers show up even if Company/Category is missing/deleted
     $sql = "SELECT o.*, 
                    c.nom_entreprise, 
                    cat.nom as category_name 
@@ -207,7 +186,6 @@ class JobOfferRepository
             return [];
         }
 
-        // Create placeholders for the SQL IN clause (?, ?, ?)
         $placeholders = implode(',', array_fill(0, count($skills), '?'));
 
         $sql = "SELECT DISTINCT o.*, 

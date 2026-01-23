@@ -17,6 +17,7 @@ class RecruiterDashboardController
     {
         $userId = $_SESSION['user']['id'] ?? 0;
         
+        // n jm3ou toutes les stats و data li ghanst3mloha f dashboard
         $data = [
             'current_user' => $_SESSION['user'] ?? null,
             'total_jobs' => $this->getTotalActiveJobs(),
@@ -33,11 +34,13 @@ class RecruiterDashboardController
         unset($_SESSION['error']);
     }
 
+    // n7sbou ch7al active jobs 3nd recruiter
     private function getTotalActiveJobs(): int
     {
         try {
             $userId = $_SESSION['user']['id'] ?? 0;
             
+            // kan joiniw m3a companies bach njibou ghir jobs dial recruiter had
             $stmt = $this->db->prepare("
                 SELECT COUNT(*) as count 
                 FROM offres o
@@ -55,6 +58,7 @@ class RecruiterDashboardController
         }
     }
 
+    // total candidatures
     private function getTotalApplication(): int
     {
         try {
@@ -76,6 +80,7 @@ class RecruiterDashboardController
         }
     }
 
+    // candidatures li mazal pending - mazal ma acceptاhomch wla refusاhomch
     private function getPendingApplications(): int
     {
         try {
@@ -98,6 +103,7 @@ class RecruiterDashboardController
         }
     }
 
+    // derniers 5 jobs li postاhom - m3a count dial applications
     private function getRecentJobs(): array
     {
         try {
@@ -129,6 +135,7 @@ class RecruiterDashboardController
         }
     }
 
+    // info dial company - nom, adresse, site web...
     private function getCompanyInfo(): ?array
     {
         try {

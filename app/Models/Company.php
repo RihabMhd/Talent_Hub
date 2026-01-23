@@ -13,7 +13,7 @@ class Application
     private ?string $site_web = null;
 
 
-
+    // ----- GETTERS -----
     public function getId(): ?int
     {
         return $this->id;

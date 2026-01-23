@@ -2,46 +2,49 @@
 namespace App\Controllers;
 
 use App\Repository\JobOfferRepository;
-use App\Repository\ApplicationRepository; // 1. Import the Application Repository
+use App\Repository\ApplicationRepository;
 use App\Config\Twig;
 
 class JobController {
     
     private $jobRepo;
-    private $appRepo; // 2. Add property for Application Repository
+    private $appRepo;
 
     public function __construct() {
         $this->jobRepo = new JobOfferRepository();
-        $this->appRepo = new ApplicationRepository(); // 3. Initialize it
+        $this->appRepo = new ApplicationRepository();
     }
 
+    // afficher détails dial job offer wa7ed
     public function show($id) {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // --- FLASH MESSAGE LOGIC START ---
+        // njibou flash messages - success wla error mn session
+        // hadi t affichaw mara wa7da w tmchi
         $flash = [];
         if (isset($_SESSION['success'])) {
-            $flash['success'] = $_SESSION['success']; // Grab the message
-            unset($_SESSION['success']);              // Delete it from session
+            $flash['success'] = $_SESSION['success'];
+            unset($_SESSION['success']); 
         }
         if (isset($_SESSION['error'])) {
-            $flash['error'] = $_SESSION['error'];     // Grab the message
-            unset($_SESSION['error']);                // Delete it from session
+            $flash['error'] = $_SESSION['error'];
+            unset($_SESSION['error']);
         }
-        // --- FLASH MESSAGE LOGIC END ---
 
-        // 1. Fetch Offer Details
+        // njibou offer m3a company info w category
         $offer = $this->jobRepo->findFullOffer($id);
 
         if (!$offer) {
+            // ila ma l9inach offer nrja3 l liste
             header('Location: /jobs'); 
             exit();
         }
 
+        // njibou tags dial offer (skills, technologies...)
         $tags = $this->jobRepo->getTagsByOfferId($id);
 
-        // 4. [NEW] Check if user has already applied
-        // We only check if a user is logged in AND is a candidate (role_id = 3)
+        // n checkew ila user deja postula l had offer
+        // hadi important bach n disabliw button apply
         $hasApplied = false;
         if (isset($_SESSION['user']) && $_SESSION['user']['role_id'] == 3) {
             $hasApplied = $this->appRepo->hasApplied($_SESSION['user']['id'], $id);
@@ -52,28 +55,29 @@ class JobController {
             'tags' => $tags,
             'session' => $_SESSION,
             'flash' => $flash, 
-            'has_applied' => $hasApplied, // 5. Pass the result to Twig
+            'has_applied' => $hasApplied,  
             'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
         ]);
     }
 
+    // afficher liste dial job offers - m3a search functionality
     public function index() {
         if (session_status() === PHP_SESSION_NONE) session_start();
 
-        // Check for search query
+        // n checkew ila kayn search query f URL
         $keyword = $_GET['q'] ?? null;
 
         if ($keyword) {
-            // If searching, use the search method
+            // ila kayn search, nst3mlو search method
             $jobs = $this->jobRepo->searchActive($keyword);
         } else {
-            // Otherwise, get all active jobs
+            // sinon njibou tous les active jobs
             $jobs = $this->jobRepo->findAllActive();
         }
 
         echo Twig::render('jobs/index.twig', [
             'jobs' => $jobs,
-            'search_query' => $keyword, // Pass this so we can keep the text in the box
+            'search_query' => $keyword,  
             'session' => $_SESSION,
             'app' => ['request' => ['uri' => $_SERVER['REQUEST_URI'] ?? '']]
         ]);

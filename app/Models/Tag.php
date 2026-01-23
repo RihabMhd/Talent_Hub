@@ -28,6 +28,8 @@ class Tag
         ];
     }
 
+     // ----- SETTERS -----
+     // ----- GETTERS -----
     public function getId(): ?int
     {
         return $this->id;

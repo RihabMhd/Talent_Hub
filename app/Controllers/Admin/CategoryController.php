@@ -16,10 +16,12 @@ class CategoryController
         $this->twig = $twig;
     }
 
+    // afficher toutes les categories
     public function index()
     {
         $categories = $this->categoryService->getAllCategories();
 
+        // nconvertiw category objects l arrays bach nst3mlohom f twig
         $categoriesArray = array_map(function ($category) {
             return $category->toArray();
         }, $categories);
@@ -34,10 +36,13 @@ class CategoryController
                 ]
             ]
         ]);
+        
+        // n7aydou messages ba3d l affichage
         unset($_SESSION['success']);
         unset($_SESSION['error']);
     }
 
+    // afficher category wa7da
     public function show(int $id)
     {
         $category = $this->categoryService->getCategoryById($id);
@@ -48,8 +53,10 @@ class CategoryController
         return $category;
     }
 
+    // créer category jdida
     public function store()
     {
+        // validation - nom khasso ykon
         if (empty($_POST['nom'])) {
             $_SESSION['error'] = 'Category name is required';
             header('Location: /admin/categories');
@@ -68,6 +75,7 @@ class CategoryController
         exit;
     }
 
+    // modifier category
     public function update(int $id)
     {
         if (empty($_POST['nom'])) {
@@ -88,6 +96,7 @@ class CategoryController
         exit;
     }
 
+    // supprimer category
     public function destroy(int $id)
     {
         $result = $this->categoryService->deleteCategory($id);

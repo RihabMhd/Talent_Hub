@@ -15,9 +15,6 @@ class ApplicationRepository
         $this->db = (new Database())->getConnection();
     }
 
-    /**
-     * Get all applications with detailed info (Admin)
-     */
     public function findAllWithDetails()
     {
         try {
@@ -56,9 +53,7 @@ class ApplicationRepository
         }
     }
 
-    /**
-     * Find applications by recruiter ID
-     */
+   
     public function findByRecruiterId($recruiterId)
     {
         $sql = "SELECT app.*, 
@@ -83,9 +78,7 @@ class ApplicationRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Find application by ID
-     */
+  
     public function findById($applicationId)
     {
         $sql = "SELECT app.*, 
@@ -112,9 +105,7 @@ class ApplicationRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Find application by ID and recruiter
-     */
+  
     public function findByIdAndRecruiter($applicationId, $recruiterId)
     {
         $sql = "SELECT app.*, 
@@ -145,9 +136,6 @@ class ApplicationRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Check if application belongs to recruiter
-     */
     public function belongsToRecruiter($applicationId, $recruiterId)
     {
         $sql = "SELECT COUNT(*) as count
@@ -166,9 +154,7 @@ class ApplicationRepository
         return $result['count'] > 0;
     }
 
-    /**
-     * Find applications by recruiter and status
-     */
+
     public function findByRecruiterAndStatus($recruiterId, $status)
     {
         $sql = "SELECT app.*, 
@@ -197,9 +183,6 @@ class ApplicationRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Search applications by recruiter
-     */
     public function searchByRecruiter($recruiterId, $searchTerm)
     {
         $sql = "SELECT app.*, 
@@ -233,9 +216,6 @@ class ApplicationRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Get status statistics for a recruiter
-     */
     public function getStatusStatsByRecruiter($recruiterId)
     {
         $sql = "SELECT 
@@ -253,9 +233,6 @@ class ApplicationRepository
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Statistics: Count applications by status (Admin)
-     */
     public function getStatusStats()
     {
         try {
@@ -288,9 +265,7 @@ class ApplicationRepository
         }
     }
 
-    /**
-     * Update application status
-     */
+   
     public function updateStatus($applicationId, $status)
     {
         $sql = "UPDATE candidatures 
@@ -304,30 +279,19 @@ class ApplicationRepository
         ]);
     }
 
-    /**
-     * Accept a candidature (Update status to 'acceptee')
-     */
+   
     public function acceptCandidature(int $id): bool
     {
         return $this->updateStatus($id, 'acceptee');
     }
 
-    /**
-     * Reject a candidature (Update status to 'refusee')
-     */
+  
     public function rejectCandidature(int $id): bool
     {
         return $this->updateStatus($id, 'refusee');
     }
 
-    /**
-     * Delete a candidature
-     */
-
-
-    /**
-     * Block a Candidate (Set is_active = 0)
-     */
+    
     public function blockUser($userId)
     {
         try {
@@ -348,9 +312,7 @@ class ApplicationRepository
         }
     }
 
-    /**
-     * Unblock a user (set is_active to 1)
-     */
+    
     public function unblockUser($userId)
     {
         try {
@@ -371,9 +333,7 @@ class ApplicationRepository
         }
     }
 
-    /**
-     * Get applications by user ID (for candidates)
-     */
+    
     public function findByUserId($userId)
     {
         $sql = "SELECT app.*, 
@@ -394,17 +354,7 @@ class ApplicationRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Check if user already applied to an offer
-     */
-
-    /**
-     * Create a new application
-     */
-
-    /**
-     * Get application count by offer ID
-     */
+   
     public function countByOffre($offreId)
     {
         $sql = "SELECT COUNT(*) as count FROM candidatures WHERE offre_id = :offre_id";
@@ -414,9 +364,7 @@ class ApplicationRepository
         return $result['count'];
     }
 
-    /**
-     * Get recent applications (for dashboard)
-     */
+    
     public function getRecent($limit = 10)
     {
         $sql = "SELECT app.*, 
@@ -437,9 +385,7 @@ class ApplicationRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Get applications by offer ID
-     */
+   
     public function findByOffre($offreId)
     {
         $sql = "SELECT app.*, 
@@ -470,7 +416,6 @@ class ApplicationRepository
         return $stmt->fetchColumn() > 0;
     }
 
-    // Save the new application
     public function create($userId, $offerId)
     {
         $sql = "INSERT INTO candidatures (user_id, offre_id,cv_path,status, date_postulation) 
@@ -478,10 +423,7 @@ class ApplicationRepository
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(['uid' => $userId, 'oid' => $offerId]);
     }
-    // ######################
-    // ... inside ApplicationRepository class ...
-
-    // Get statistics for the dashboard cards
+    
     public function getCandidateStats($userId)
     {
         $sql = "SELECT 
@@ -497,7 +439,6 @@ class ApplicationRepository
         return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
-    // Get the 5 most recent applications
     public function getRecentApplications($userId)
     {
         $sql = "SELECT c.*, o.titre as job_title, comp.nom_entreprise, o.lieu, o.salaire

@@ -15,13 +15,12 @@ class AdminUserController
         $this->twig = $twig;
     }
 
-    /**
-     * Display list of users pending verification
-     */
+    // afficher liste dial users li mazal ma verifiench
     public function pending()
     {
         $pendingUsers = $this->verificationService->getPendingUsers();
         
+        // kanpassiw data l template b3da nrenderiwh
         echo $this->twig->render('admin/users/pending.html.twig', [
             'users' => $pendingUsers,
             'current_user' => $_SESSION['user'] ?? null,
@@ -33,31 +32,29 @@ class AdminUserController
             ]
         ]);
         
-        // Clear messages after displaying
+        // n7aydou messages mn session ba3d ma naffichewhom bach may b9awch ytaffichou
         unset($_SESSION['success']);
         unset($_SESSION['error']);
     }
 
-    /**
-     * Verify a user
-     */
+    // verify user - kay acceptih
     public function verify(int $id)
     {
         $result = $this->verificationService->verifyUser($id);
         
+        // n checkew result w nsauviw message f session
         if ($result['success']) {
             $_SESSION['success'] = $result['message'];
         } else {
             $_SESSION['error'] = $result['message'];
         }
         
+        // nrja3 l pending page
         header('Location: /admin/users/pending');
         exit;
     }
 
-    /**
-     * Reject a user
-     */
+    // reject user - kayrefusih
     public function reject(int $id)
     {
         $result = $this->verificationService->rejectUser($id);

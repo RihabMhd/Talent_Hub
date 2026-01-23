@@ -51,7 +51,7 @@ class Candidate
     }
 
    
-
+    // ----- GETTERS -----
     public function getId(): ?int
     {
         return $this->id;
@@ -117,7 +117,7 @@ class Candidate
         return $this->updatedAt;
     }
 
-   
+    // ----- SETTERS -----
 
     public function setFullName(string $fullName): void
     {

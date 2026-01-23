@@ -1,4 +1,3 @@
-{# Helper macro to check active link #}
 {% macro isActive(uri, path) %}
     {{ uri starts with path ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' }}
 {% endmacro %}

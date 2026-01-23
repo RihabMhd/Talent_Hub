@@ -11,7 +11,6 @@
     
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Clean scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -21,7 +20,6 @@
 
 <body class="bg-slate-50 text-slate-600 antialiased h-screen flex overflow-hidden">
 
-    {# Sidebar #}
     {% include 'admin/sidebar.html.twig' %}
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-50/50">
@@ -163,16 +161,14 @@
     </main>
 
     <script>
-        // Global Defaults
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#f1f5f9';
 
-        // 1. Jobs Bar Chart
         const jobsCtx = document.getElementById('jobsChart').getContext('2d');
         const jobsGradient = jobsCtx.createLinearGradient(0, 0, 0, 300);
-        jobsGradient.addColorStop(0, '#6366f1'); // Indigo 500
-        jobsGradient.addColorStop(1, '#a5b4fc'); // Indigo 300
+        jobsGradient.addColorStop(0, '#6366f1'); 
+        jobsGradient.addColorStop(1, '#a5b4fc'); 
 
         new Chart(jobsCtx, {
             type: 'bar',
@@ -204,7 +200,6 @@
             }
         });
 
-        // 2. Users Doughnut Chart
         const usersCtx = document.getElementById('usersChart').getContext('2d');
         new Chart(usersCtx, {
             type: 'doughnut',

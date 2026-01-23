@@ -14,6 +14,7 @@ class UserController
         $this->twig = $twig;
     }
 
+    // afficher tous les users - admin y9der ychof liste kamla
     public function index()
     {
         $users = $this->userService->getAllUsers();
@@ -29,7 +30,7 @@ class UserController
             ]
         ]);
         
-  
+        // n7aydou flash messages ba3d l affichage
         unset($_SESSION['success']);
         unset($_SESSION['error']);
     }
